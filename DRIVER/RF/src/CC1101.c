@@ -36,7 +36,7 @@ INT8U PaTabel[] = { 0xc0, 0xC8, 0x84, 0x60, 0x68, 0x34, 0x1D, 0x0E, 0x12};
 
 static const INT8U CC1101InitData[35][2]= 
 {
-  {CC1101_IOCFG2,      0x00}, 
+  {CC1101_IOCFG2,      0x24}, 
   {CC1101_IOCFG0,      0x06}, 
   {CC1101_FIFOTHR,     0x4D}, 
   {CC1101_PKTCTRL0,    0x05},
@@ -93,9 +93,9 @@ OUTPUT   : None
 void  CC1101WORInit( void )
 {
 
-    CC1101WriteReg(CC1101_MCSM0,0x38);
+    CC1101WriteReg(CC1101_MCSM0,0x18);
     // Main Radio Control State Machine Configuration 
-    //[5:4]=11,When to perform automatic calibration = Every 4th time When going from IDLE to RX or TX
+    //[5:4]=01,When to perform automatic calibration = When going from IDLE to RX or TX (or FSTXON) 
     //[3:2]=10,Timeout after XOSC start = Approx. 149 ¨C 155 ¦Ìs 
     //[1]=0,Disables the pin radio control option 
     //[0]=0,Force the XOSC to stay on in the SLEEP state =  Disable
@@ -106,19 +106,19 @@ void  CC1101WORInit( void )
     //[3]=1,Enables the RC oscillator calibration. 
     //[1:0]=00,WOR_RES =00,Controls the Event 0 resolution as well as maximum timeout of the WOR module 
     //and maximum timeout under normal RX operation: 
-    CC1101WriteReg(CC1101_MCSM2,0x06);
+    CC1101WriteReg(CC1101_MCSM2,0x01);
     //Main Radio Control State Machine Configuration 
     //[4]=0,Direct RX termination based on RSSI measurement 
     //[3]=0,When the RX_TIME timer expires, the chip checks if sync word is found when RX_TIME_QUAL=0
-    //[2:0]=110,Timeout for sync word search in RX for both WOR mode and normal RX 
+    //[2:0]=001,Timeout for sync word search in RX for both WOR mode and normal RX 
     //operation. The timeout is relative to the programmed EVENT0 timeout.  
-    //RX timeout = 2ms
-    CC1101WriteReg(CC1101_WOREVT1,0x8C);
+    //RX timeout = 0.89ms
+    CC1101WriteReg(CC1101_WOREVT1,0x01);
     // High Byte Event0 
-    CC1101WriteReg(CC1101_WOREVT0,0xA0);
+    CC1101WriteReg(CC1101_WOREVT0,0xF1);
     // Low Byte Event0 
-    //Event0 = 36000
-    //EVENT0 timeout = 1s
+    //Event0 = 497
+    //EVENT0 timeout = 14.34ms
     CC1101WriteCmd( CC1101_SWORRST );
     //Reset real time clock to Event1 value. 
 }

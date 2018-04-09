@@ -41,12 +41,14 @@ INT8U RF_received_flag = 0;
 void RF_configuration(void)
 {
   CC1101Init();
-  Set_Local_ADDR(0X02);
-  Set_Target_ADDR(0X01);
+  CC1101WORInit();
+  Set_Local_ADDR(0X01);
+  Set_Target_ADDR(0X02);
   Local_ADDR = Get_Local_ADDR();
   Target_ADDR = Get_Target_ADDR();
   CC1101SetAddress(Local_ADDR, BROAD_0);    //BROAD_0 
-  CC1101SetTRMode( RX_MODE );
+  //CC1101SetTRMode( RX_MODE );
+  CC1101SetSWOR();
   RF_TRX_MODE=RX_MODE;
 }
 
@@ -124,7 +126,7 @@ void RF_TX_InfiniteDATA(INT8U *txbuffer, INT16U size, INT8U addr)
         }
     }
     CC1101ClrTXBuff(); 
-    CC1101SetTRMode( RX_MODE );
+    CC1101SetSWOR();
     RF_TRX_MODE = RX_MODE;
 }
 
@@ -156,7 +158,8 @@ void RF_GD0_it_Handler(void)
             }
             LED1_OFF();
             CC1101ClrRXBuff();
-            CC1101SetTRMode( RX_MODE );
+            CC1101SetSWOR();
+            //CC1101SetTRMode( RX_MODE );
         }
         else//Ω” ’µΩsync  
         {     

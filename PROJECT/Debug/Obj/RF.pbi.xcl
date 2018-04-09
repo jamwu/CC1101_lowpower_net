@@ -1,26 +1,26 @@
-"F:\userdata\mypro\STM8L10X\RFCC1100网关1.8new\BSP\src\RF.c"
+"C:\Users\MrBlu\Documents\GitHub\CC1101_lowpower_net\BSP\src\RF.c"
 -std=c99
 -ferror-limit=0
 -I
-F:\userdata\mypro\STM8L10X\RFCC1100网关1.8new\PROJECT\..\APP\inc
+C:\Users\MrBlu\Documents\GitHub\CC1101_lowpower_net\PROJECT\..\APP\inc
 -I
-F:\userdata\mypro\STM8L10X\RFCC1100网关1.8new\PROJECT\..\BSP\inc
+C:\Users\MrBlu\Documents\GitHub\CC1101_lowpower_net\PROJECT\..\BSP\inc
 -I
-F:\userdata\mypro\STM8L10X\RFCC1100网关1.8new\PROJECT\..\DRIVER\CPU\STM8L10x_StdPeriph_Driver\inc
+C:\Users\MrBlu\Documents\GitHub\CC1101_lowpower_net\PROJECT\..\DRIVER\CPU\STM8L10x_StdPeriph_Driver\inc
 -I
-F:\userdata\mypro\STM8L10X\RFCC1100网关1.8new\PROJECT\..\DRIVER\RF\inc
+C:\Users\MrBlu\Documents\GitHub\CC1101_lowpower_net\PROJECT\..\DRIVER\RF\inc
 -I
 C:\Program Files (x86)\IAR Systems\Embedded Workbench 8.0\stm8\inc
 -I
 C:\Program Files (x86)\IAR Systems\Embedded Workbench 8.0\stm8\inc\c
 -I
-F:\userdata\mypro\STM8L10X\RFCC1100网关1.8new\APP\inc
+C:\Users\MrBlu\Documents\GitHub\CC1101_lowpower_net\APP\inc
 -I
-F:\userdata\mypro\STM8L10X\RFCC1100网关1.8new\BSP\inc
+C:\Users\MrBlu\Documents\GitHub\CC1101_lowpower_net\BSP\inc
 -I
-F:\userdata\mypro\STM8L10X\RFCC1100网关1.8new\DRIVER\CPU\STM8L10x_StdPeriph_Driver\inc
+C:\Users\MrBlu\Documents\GitHub\CC1101_lowpower_net\DRIVER\CPU\STM8L10x_StdPeriph_Driver\inc
 -I
-F:\userdata\mypro\STM8L10X\RFCC1100网关1.8new\DRIVER\RF\inc
+C:\Users\MrBlu\Documents\GitHub\CC1101_lowpower_net\DRIVER\RF\inc
 -D__CHAR_BITS__=8
 -D__CHAR_MAX__=0xff
 -D__CHAR_MIN__=0
