@@ -42,8 +42,8 @@ void RF_configuration(void)
 {
   CC1101Init();
   CC1101WORInit();
-  Set_Local_ADDR(0X01);
-  Set_Target_ADDR(0X02);
+  Set_Local_ADDR(0X02);
+  Set_Target_ADDR(0X01);
   Local_ADDR = Get_Local_ADDR();
   Target_ADDR = Get_Target_ADDR();
   CC1101SetAddress(Local_ADDR, BROAD_0);    //BROAD_0 

@@ -41,7 +41,6 @@ INT8U RF_received_flag = 0;
 void RF_configuration(void)
 {
   CC1101Init();
-  CC1101WORInit();
   Set_Local_ADDR(0X01);
   Set_Target_ADDR(0X02);
   Local_ADDR = Get_Local_ADDR();
@@ -76,12 +75,13 @@ void RF_TX_DATA(INT8U *txbuffer, INT8U size, INT8U addr)
 {
     CC1101ClrTXBuff();
     RF_TRX_MODE=TX_MODE;
-   
+    
+    CC1101SetTRMode( TX_MODE ); 
+    delay_ms(15);//15msµÄµ¼Ç°Âë
+    
     CC1101WriteReg( CC1101_TXFIFO, size + 1);
     CC1101WriteReg( CC1101_TXFIFO, addr);
     CC1101WriteMultiReg( CC1101_TXFIFO, txbuffer, size);
-    
-    CC1101SetTRMode( TX_MODE ); 
     
     RF_timeout_count=0;
     while(CC_GDO0_READ() == 0)

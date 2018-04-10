@@ -36,7 +36,7 @@ INT8U PaTabel[] = { 0xc0, 0xC8, 0x84, 0x60, 0x68, 0x34, 0x1D, 0x0E, 0x12};
 
 static const INT8U CC1101InitData[35][2]= 
 {
-  {CC1101_IOCFG2,      0x24}, 
+  {CC1101_IOCFG2,      0x00}, 
   {CC1101_IOCFG0,      0x06}, 
   {CC1101_FIFOTHR,     0x4D}, 
   {CC1101_PKTCTRL0,    0x05},
