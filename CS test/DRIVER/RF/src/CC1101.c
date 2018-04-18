@@ -15,8 +15,8 @@ INT8U PaTabel[] = { 0xc0, 0xC8, 0x84, 0x60, 0x68, 0x34, 0x1D, 0x0E, 0x12};
 // CRC autoflush = false 
 // Channel spacing = 199.951172KHZ
 // Data format = Normal mode 
-// Data rate = 249.939KB
-// RX filter BW = 541.666667KHZ
+// Data rate = 99.9756KB
+// RX filter BW = 325.000000KHZ
 // PA ramping = false 
 // Preamble count = 24 
 // Whitening = false 
@@ -26,9 +26,9 @@ INT8U PaTabel[] = { 0xc0, 0xC8, 0x84, 0x60, 0x68, 0x34, 0x1D, 0x0E, 0x12};
 // TX power = 10 
 // Manchester enable = false 
 // CRC enable = true 
-// Deviation = 127KHZ
+// Deviation = 47KHZ
 // Packet length mode = Variable packet length mode. Packet length configured by the first byte after sync word 
-// Packet length = 255 
+// Packet length = 64
 // Modulation format = GFSK 
 // Base frequency = 399.999939 
 // Modulated = true 
@@ -41,16 +41,16 @@ static const INT8U CC1101InitData[35][2]=
   {CC1101_FIFOTHR,     0x4D}, 
   {CC1101_PKTCTRL0,    0x05},
   {CC1101_CHANNR,      0x01},
-  /*******************IF frequency************************///(中频381KHZ)
-  {CC1101_FSCTRL1,     0x0F},
+  /*******************IF frequency************************///(中频152.3KHZ)
+  {CC1101_FSCTRL1,     0x06},
   /*******************base frequency************************///可更改
   {CC1101_FREQ2,       0x0F},
   {CC1101_FREQ1,       0x62},
   {CC1101_FREQ0,       0x76},
   /*******************filter BW*****************************///可更改
-  {CC1101_MDMCFG4,     0x2D},
+  {CC1101_MDMCFG4,     0x5B},
   /*******************data rate*****************************///可更改
-  {CC1101_MDMCFG3,     0x3B},
+  {CC1101_MDMCFG3,     0xF8},
   /************************GFSK*****************************/  
   {CC1101_MDMCFG2,     0x16},
   /***********************preamble bytes********************/
@@ -58,7 +58,7 @@ static const INT8U CC1101InitData[35][2]=
   /**********************Channel spacing********************///可更改
   {CC1101_MDMCFG0,     0xF8}, 
   /**********************Deviation**************************///可更改
-  {CC1101_DEVIATN,     0x62},
+  {CC1101_DEVIATN,     0x47},
   {CC1101_MCSM2,       0x07},
   /*********************************************************///可更改
   {CC1101_MCSM1,       0x3F},
