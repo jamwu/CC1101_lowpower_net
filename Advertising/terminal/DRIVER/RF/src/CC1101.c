@@ -36,7 +36,7 @@ INT8U PaTabel[] = { 0xc0, 0xC8, 0x84, 0x60, 0x68, 0x34, 0x1D, 0x0E, 0x12};
 
 static const INT8U CC1101InitData[35][2]= 
 {
-  {CC1101_IOCFG2,      0x00}, 
+  {CC1101_IOCFG2,      0x09},  //GDO2引脚输出载波感应电平,如果RSSI级别在门限之上为高电平
   {CC1101_IOCFG0,      0x06}, 
   {CC1101_FIFOTHR,     0x4D}, 
   {CC1101_PKTCTRL0,    0x05},
@@ -61,13 +61,13 @@ static const INT8U CC1101InitData[35][2]=
   {CC1101_DEVIATN,     0x62},
   {CC1101_MCSM2,       0x07},
   /*********************************************************///可更改
-  {CC1101_MCSM1,       0x3F},
+  {CC1101_MCSM1,       0x3F}, //接受信号强度低于门限值且当前未接收报文则信道空闲，让TX和RX结束后，芯片都保持在RX状态。        
   {CC1101_MCSM0,       0x18},
   {CC1101_FOCCFG,      0x16},
   {CC1101_BSCFG,       0x6C},
   /*********************************************************///可更改
-  {CC1101_AGCCTRL2,    0x43},
-  {CC1101_AGCCTRL1,    0x49},
+  {CC1101_AGCCTRL2,    0x07}, //42dB   
+  {CC1101_AGCCTRL1,    0x40}, //低噪声放大器增益先减小，载波监听相对阈值禁用,载波监听绝对阈值由MAGN_TARGET设置
   {CC1101_AGCCTRL0,    0x91},
   {CC1101_WOREVT1,     0x87},
   {CC1101_WOREVT0,     0x6B},
@@ -122,6 +122,7 @@ void  CC1101WORInit( void )
     CC1101WriteCmd( CC1101_SWORRST );
     //Reset real time clock to Event1 value. 
 }
+
 /*
 ================================================================================
 Function : CC1101ReadReg( )

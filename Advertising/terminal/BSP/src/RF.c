@@ -47,7 +47,7 @@ void RF_configuration(void)
   Target_ADDR = Get_Target_ADDR();
   CC1101SetAddress(Local_ADDR, BROAD_0);    //BROAD_0 
   CC1101SetTRMode( RX_MODE );
-  RF_TRX_MODE=RX_MODE;
+  RF_TRX_MODE=TX_MODE;
 }
 
 void Set_Local_ADDR(INT8U Local_Addr)
@@ -70,14 +70,23 @@ INT8U Get_Target_ADDR(void)
     return ReadE2PData(1);
 }
 
+void RF_CCA()
+{
+    CC1101SetIdle();
+    CC1101WriteCmd( CC1101_SFTX );
+    CC1101WriteCmd( CC1101_SFRX );
+    
+    CC1101SetTRMode( RX_MODE ); 
+}
+
 //长度不能超过60字节
 void RF_TX_DATA(INT8U *txbuffer, INT8U size, INT8U addr)
 {
-    CC1101ClrTXBuff();
     RF_TRX_MODE=TX_MODE;
-    
+    RF_CCA();
     CC1101SetTRMode( TX_MODE ); 
-    delay_ms(15);//15ms的导前码
+    
+    if(CC1101ReadStatus(CC1101_MARCSTATE) == CC1101_MARCSTATE)
     
     CC1101WriteReg( CC1101_TXFIFO, size + 1);
     CC1101WriteReg( CC1101_TXFIFO, addr);

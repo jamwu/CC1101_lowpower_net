@@ -1,26 +1,26 @@
-"C:\Users\MrBlu\Documents\GitHub\CC1101_lowpower_net\gateway\DRIVER\RF\src\CC1101.c"
+"C:\Users\MrBlu\Documents\GitHub\CC1101_lowpower_net\Advertising\terminal\DRIVER\RF\src\CC1101.c"
 -std=c99
 -ferror-limit=0
 -I
-C:\Users\MrBlu\Documents\GitHub\CC1101_lowpower_net\gateway\PROJECT\..\APP\inc
+C:\Users\MrBlu\Documents\GitHub\CC1101_lowpower_net\Advertising\terminal\PROJECT\..\APP\inc
 -I
-C:\Users\MrBlu\Documents\GitHub\CC1101_lowpower_net\gateway\PROJECT\..\BSP\inc
+C:\Users\MrBlu\Documents\GitHub\CC1101_lowpower_net\Advertising\terminal\PROJECT\..\BSP\inc
 -I
-C:\Users\MrBlu\Documents\GitHub\CC1101_lowpower_net\gateway\PROJECT\..\DRIVER\CPU\STM8L10x_StdPeriph_Driver\inc
+C:\Users\MrBlu\Documents\GitHub\CC1101_lowpower_net\Advertising\terminal\PROJECT\..\DRIVER\CPU\STM8L10x_StdPeriph_Driver\inc
 -I
-C:\Users\MrBlu\Documents\GitHub\CC1101_lowpower_net\gateway\PROJECT\..\DRIVER\RF\inc
+C:\Users\MrBlu\Documents\GitHub\CC1101_lowpower_net\Advertising\terminal\PROJECT\..\DRIVER\RF\inc
 -I
 C:\Program Files (x86)\IAR Systems\Embedded Workbench 8.0\stm8\inc
 -I
 C:\Program Files (x86)\IAR Systems\Embedded Workbench 8.0\stm8\inc\c
 -I
-C:\Users\MrBlu\Documents\GitHub\CC1101_lowpower_net\gateway\APP\inc
+C:\Users\MrBlu\Documents\GitHub\CC1101_lowpower_net\Advertising\terminal\APP\inc
 -I
-C:\Users\MrBlu\Documents\GitHub\CC1101_lowpower_net\gateway\BSP\inc
+C:\Users\MrBlu\Documents\GitHub\CC1101_lowpower_net\Advertising\terminal\BSP\inc
 -I
-C:\Users\MrBlu\Documents\GitHub\CC1101_lowpower_net\gateway\DRIVER\CPU\STM8L10x_StdPeriph_Driver\inc
+C:\Users\MrBlu\Documents\GitHub\CC1101_lowpower_net\Advertising\terminal\DRIVER\CPU\STM8L10x_StdPeriph_Driver\inc
 -I
-C:\Users\MrBlu\Documents\GitHub\CC1101_lowpower_net\gateway\DRIVER\RF\inc
+C:\Users\MrBlu\Documents\GitHub\CC1101_lowpower_net\Advertising\terminal\DRIVER\RF\inc
 -D__CHAR_BITS__=8
 -D__CHAR_MAX__=0xff
 -D__CHAR_MIN__=0

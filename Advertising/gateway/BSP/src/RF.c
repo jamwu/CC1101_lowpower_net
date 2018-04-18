@@ -77,8 +77,8 @@ void RF_TX_DATA(INT8U *txbuffer, INT8U size, INT8U addr)
     RF_TRX_MODE=TX_MODE;
     
     CC1101SetTRMode( TX_MODE ); 
-    delay_ms(15);//15msµÄµ¼Ç°Âë
-    
+    while(1);
+    delay_ms(100);
     CC1101WriteReg( CC1101_TXFIFO, size + 1);
     CC1101WriteReg( CC1101_TXFIFO, addr);
     CC1101WriteMultiReg( CC1101_TXFIFO, txbuffer, size);
