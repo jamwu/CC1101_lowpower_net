@@ -1,26 +1,26 @@
-"E:\Users\MrBlu\Documents\GitHub\CC1101_lowpower_net\CS test\DRIVER\RF\src\CC1101.c"
+"C:\Users\MrBlu\Documents\GitHub\CC1101_lowpower_net\CS test\DRIVER\RF\src\CC1101.c"
 -std=c99
 -ferror-limit=0
 -I
-E:\Users\MrBlu\Documents\GitHub\CC1101_lowpower_net\CS test\PROJECT\..\APP\inc
+C:\Users\MrBlu\Documents\GitHub\CC1101_lowpower_net\CS test\PROJECT\..\APP\inc
 -I
-E:\Users\MrBlu\Documents\GitHub\CC1101_lowpower_net\CS test\PROJECT\..\BSP\inc
+C:\Users\MrBlu\Documents\GitHub\CC1101_lowpower_net\CS test\PROJECT\..\BSP\inc
 -I
-E:\Users\MrBlu\Documents\GitHub\CC1101_lowpower_net\CS test\PROJECT\..\DRIVER\CPU\STM8L10x_StdPeriph_Driver\inc
+C:\Users\MrBlu\Documents\GitHub\CC1101_lowpower_net\CS test\PROJECT\..\DRIVER\CPU\STM8L10x_StdPeriph_Driver\inc
 -I
-E:\Users\MrBlu\Documents\GitHub\CC1101_lowpower_net\CS test\PROJECT\..\DRIVER\RF\inc
+C:\Users\MrBlu\Documents\GitHub\CC1101_lowpower_net\CS test\PROJECT\..\DRIVER\RF\inc
 -I
-D:\software\IAR FOR STM8\stm8\inc
+C:\Program Files (x86)\IAR Systems\Embedded Workbench 8.0\stm8\inc
 -I
-D:\software\IAR FOR STM8\stm8\inc\c
+C:\Program Files (x86)\IAR Systems\Embedded Workbench 8.0\stm8\inc\c
 -I
-E:\Users\MrBlu\Documents\GitHub\CC1101_lowpower_net\CS test\APP\inc
+C:\Users\MrBlu\Documents\GitHub\CC1101_lowpower_net\CS test\APP\inc
 -I
-E:\Users\MrBlu\Documents\GitHub\CC1101_lowpower_net\CS test\BSP\inc
+C:\Users\MrBlu\Documents\GitHub\CC1101_lowpower_net\CS test\BSP\inc
 -I
-E:\Users\MrBlu\Documents\GitHub\CC1101_lowpower_net\CS test\DRIVER\CPU\STM8L10x_StdPeriph_Driver\inc
+C:\Users\MrBlu\Documents\GitHub\CC1101_lowpower_net\CS test\DRIVER\CPU\STM8L10x_StdPeriph_Driver\inc
 -I
-E:\Users\MrBlu\Documents\GitHub\CC1101_lowpower_net\CS test\DRIVER\RF\inc
+C:\Users\MrBlu\Documents\GitHub\CC1101_lowpower_net\CS test\DRIVER\RF\inc
 -D__CHAR_BITS__=8
 -D__CHAR_MAX__=0xff
 -D__CHAR_MIN__=0
@@ -265,8 +265,8 @@ E:\Users\MrBlu\Documents\GitHub\CC1101_lowpower_net\CS test\DRIVER\RF\inc
 -D__EDG_SYSV=0
 -D__EDG_ANSIC=1
 -D__EDG_CPP11_IL_EXTENSIONS_SUPPORTED=1
--D_DLIB_CONFIG_FILE_HEADER_NAME="D:\software\IAR FOR STM8\stm8\LIB\dlstm8smn.h"
--D_DLIB_CONFIG_FILE_STRING="D:\\software\\IAR FOR STM8\\stm8\\LIB\\dlstm8smn.h"
+-D_DLIB_CONFIG_FILE_HEADER_NAME="C:\Program Files (x86)\IAR Systems\Embedded Workbench 8.0\stm8\LIB\dlstm8smn.h"
+-D_DLIB_CONFIG_FILE_STRING="C:\\Program Files (x86)\\IAR Systems\\Embedded Workbench 8.0\\stm8\\LIB\\dlstm8smn.h"
 -D__VERSION__="IAR C/C++ Compiler V3.10.1.201 for STM8"
 -D__CODE_MEMORY_LIST1__()=__CODE_MEM_HELPER1__(__code, 0 )
 -D__CODE_MEMORY_LIST2__(_P1)=__CODE_MEM_HELPER2__(__code, 0 ,  _P1 )
