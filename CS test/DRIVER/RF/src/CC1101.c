@@ -36,7 +36,7 @@ INT8U PaTabel[] = { 0xc0, 0xC8, 0x84, 0x60, 0x68, 0x34, 0x1D, 0x0E, 0x12};
 
 static const INT8U CC1101InitData[35][2]= 
 {
-  {CC1101_IOCFG2,      0x00}, 
+  {CC1101_IOCFG2,      0x09}, 
   {CC1101_IOCFG0,      0x06}, 
   {CC1101_FIFOTHR,     0x4D}, 
   {CC1101_PKTCTRL0,    0x05},
@@ -66,8 +66,8 @@ static const INT8U CC1101InitData[35][2]=
   {CC1101_FOCCFG,      0x1D},
   {CC1101_BSCFG,       0x1C},
   /*********************************************************///¿É¸ü¸Ä
-  {CC1101_AGCCTRL2,    0xC7}, 
-  {CC1101_AGCCTRL1,    0x00},
+  {CC1101_AGCCTRL2,    0xFB}, 
+  {CC1101_AGCCTRL1,    0x40},
   {CC1101_AGCCTRL0,    0xB2},
   {CC1101_WOREVT1,     0x87},
   {CC1101_WOREVT0,     0x6B},
@@ -409,6 +409,21 @@ void IOCFG2_RX_Configuration(void)
 void IOCFG2_TX_Configuration(void)
 {
     CC1101WriteReg(CC1101_IOCFG2, 0x02);
+}
+
+INT8S CC1101_RSSI_Caculate(INT8U RSSI_reg)
+{
+    INT8S i=0;
+    INT8S RSSI_offset = 74;
+    if(RSSI_reg >= 128)
+    {
+        i = (RSSI_reg - 256)/2 - RSSI_offset;
+    }
+    else
+    {
+        i = RSSI_reg/2 - RSSI_offset;
+    }
+    return i;
 }
 /*
 ================================================================================

@@ -41,8 +41,8 @@ INT8U RF_received_flag = 0;
 void RF_configuration(void)
 {
   CC1101Init();
-  Set_Local_ADDR(0X02);
-  Set_Target_ADDR(0X01);
+  Set_Local_ADDR(0X01);
+  Set_Target_ADDR(0X02);
   Local_ADDR = Get_Local_ADDR();
   Target_ADDR = Get_Target_ADDR();
   CC1101SetAddress(Local_ADDR, BROAD_0);    //BROAD_0 
@@ -75,29 +75,38 @@ void RF_TX_DATA(INT8U *txbuffer, INT8U size, INT8U addr)
 {
     CC1101ClrTXBuff();
     RF_TRX_MODE=TX_MODE;
-    
-    CC1101SetTRMode( TX_MODE ); 
-    
-    CC1101WriteReg( CC1101_TXFIFO, size + 1);
-    CC1101WriteReg( CC1101_TXFIFO, addr);
-    CC1101WriteMultiReg( CC1101_TXFIFO, txbuffer, size);
-    
-    RF_timeout_count=0;
-    while(CC_GDO0_READ() == 0)
+    CC1101SetTRMode( RX_MODE );
+    delay_ms(1);
+    if(CC1101ReadStatus(CC1101_PKTSTATUS)&0x10)
     {
-        if(RF_timeout_count >= 100)//20ms
+        CC1101SetTRMode( TX_MODE ); 
+           
+        CC1101WriteReg( CC1101_TXFIFO, size + 1);
+        CC1101WriteReg( CC1101_TXFIFO, addr);
+        CC1101WriteMultiReg( CC1101_TXFIFO, txbuffer, size);
+        
+        RF_timeout_count=0;
+        while(CC_GDO0_READ() == 0)
         {
-          break;
-        }     
+            if(RF_timeout_count >= 100)//20ms
+            {
+              break;
+            }     
+        }
+        RF_timeout_count=0;
+        while(CC_GDO0_READ() != 0)
+        {
+            if(RF_timeout_count >= 100)//20ms
+            {
+              break;
+            }            
+        }
     }
-    RF_timeout_count=0;
-    while(CC_GDO0_READ() != 0)
+    else
     {
-        if(RF_timeout_count >= 100)//20ms
-        {
-          break;
-        }            
+        printf("CCA\n");
     }
+
 }
 
 //任意长度
@@ -189,7 +198,7 @@ void RF_GD2_it_Handler(void)
 
 void RF_Handler(void)
 {
-    INT8U i,j,k;
+    INT8S RF_RSSI=0;
     if(RF_received_flag == 0)//没有接收完无线数据(优先处理无线数据)
     {
         if(uart_receive_timeout_flag == 1)//接收完一帧串口数据       
@@ -202,17 +211,8 @@ void RF_Handler(void)
     else  //接收完一帧无线数据
     {
         uart_send_bits(rx_Base_DATA.payload,rx_Base_DATA.size); //发送到串口    
-        putchar('\r');
-        putchar('\n');
-        i = rx_Base_DATA.RSSI/100;
-        j = (rx_Base_DATA.RSSI - i*100)/10;
-        k = rx_Base_DATA.RSSI%10;
-        putchar(i + '0');
-        putchar(j + '0');
-        putchar(k + '0');
-        putchar('\r');
-        putchar('\n');
-        //printf("\r\nRSSI= %d\r\n",rx_Base_DATA.RSSI);
+        RF_RSSI = CC1101_RSSI_Caculate(rx_Base_DATA.RSSI);
+        printf("RSSI = %d dBm\r\n",RF_RSSI);
         RF_received_flag = 0;      
     }
 }

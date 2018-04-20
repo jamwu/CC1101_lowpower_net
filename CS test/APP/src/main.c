@@ -47,11 +47,31 @@ void system_init(void);
   */
 void main(void)
 {
+    //INT8U RF_RSSI_reg=0;
+    //INT8S RF_RSSI=0;
     system_init();
     /* Executive loop, runs continually after initialization */
     while (1)
     {
         RF_Handler();
+      /*
+        if(CC1101ReadStatus(CC1101_MARCSTATE) == 13)
+        {
+            RF_RSSI_reg=CC1101ReadStatus(CC1101_RSSI);
+            RF_RSSI = CC1101_RSSI_Caculate(RF_RSSI_reg);
+            printf("RSSI = %d dBm\r\n",RF_RSSI);
+            delay_ms(200);
+        }
+      
+        if(CC1101ReadStatus(CC1101_PKTSTATUS)&0x10)
+        {
+            LED2_OFF();
+        }
+        else
+        {
+            LED2_ON();
+        }
+      */
     }
 }
 
