@@ -81,6 +81,8 @@ void CC1101SetAddress(INT8U address, ADDR_MODE AddressMode);
 /*Set the SYNC bytes of the CC1101*/
 void CC1101SetSYNC(INT16U sync);
 
+INT8S CC1101_RSSI_Caculate(INT8U RSSI_reg);
+
 /*Initialize the CC1101, User can modify it*/
 void CC1101Init(void);
 

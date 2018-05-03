@@ -7,8 +7,8 @@
 #include "stdio.h"
 /* Exported types ------------------------------------------------------------*/
 /* Exported define -----------------------------------------------------------*/
-#define uart_send_temp_num 255
-#define uart_receive_temp_num 255
+#define uart_send_temp_num 60
+#define uart_receive_temp_num 60
 /* Exported macro ------------------------------------------------------------*/
 /* Exported variables --------------------------------------------------------*/
 extern uint8_t uart_receive_temp[uart_receive_temp_num];

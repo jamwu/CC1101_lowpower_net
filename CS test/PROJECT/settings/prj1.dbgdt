@@ -846,7 +846,7 @@
                     <item>RF_status</item>
                     <item>RF_received_flag</item>
                     <item>l</item>
-                    <item></item>
+                    <item />
                 </expressions>
                 <col-names>
                     <item>Expression</item>

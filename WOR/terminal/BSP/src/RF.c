@@ -76,29 +76,38 @@ void RF_TX_DATA(INT8U *txbuffer, INT8U size, INT8U addr)
 {
     CC1101ClrTXBuff();
     RF_TRX_MODE=TX_MODE;
-   
-    CC1101WriteReg( CC1101_TXFIFO, size + 1);
-    CC1101WriteReg( CC1101_TXFIFO, addr);
-    CC1101WriteMultiReg( CC1101_TXFIFO, txbuffer, size);
-    
-    CC1101SetTRMode( TX_MODE ); 
-    
-    RF_timeout_count=0;
-    while(CC_GDO0_READ() == 0)
+    CC1101SetTRMode( RX_MODE );
+    delay_ms(1);
+    if(CC1101ReadStatus(CC1101_PKTSTATUS)&0x10)
     {
-        if(RF_timeout_count >= 100)//20ms
+        CC1101SetTRMode( TX_MODE ); 
+           
+        CC1101WriteReg( CC1101_TXFIFO, size + 1);
+        CC1101WriteReg( CC1101_TXFIFO, addr);
+        CC1101WriteMultiReg( CC1101_TXFIFO, txbuffer, size);
+        
+        RF_timeout_count=0;
+        while(CC_GDO0_READ() == 0)
         {
-          break;
-        }     
+            if(RF_timeout_count >= 100)//20ms
+            {
+              break;
+            }     
+        }
+        RF_timeout_count=0;
+        while(CC_GDO0_READ() != 0)
+        {
+            if(RF_timeout_count >= 100)//20ms
+            {
+              break;
+            }            
+        }
     }
-    RF_timeout_count=0;
-    while(CC_GDO0_READ() != 0)
+    else
     {
-        if(RF_timeout_count >= 100)//20ms
-        {
-          break;
-        }            
+        printf("CCA\n");
     }
+
 }
 
 //任意长度
@@ -134,24 +143,27 @@ void RF_GD0_it_Handler(void)
     INT8U rx_bytes;
     if(RF_TRX_MODE == RX_MODE)//接收模式
     {
-        if(CC_GDO0_READ() == 0)//接收完成
-        {           
-            rx_bytes=CC1101ReadReg(CC1101_RXBYTES);
-            if((rx_bytes & 0x7f) != 0)
+        if(CC_GDO0_READ() == 0)
+        {      
+            if(CC1101ReadStatus(CC1101_MARCSTATE) != 17) //not in RXFIFO_OVERFLOW status
             {
-                rx_Base_DATA.size=CC1101ReadReg(CC1101_RXFIFO);
-                if(rx_Base_DATA.size != 0)
+                rx_bytes=CC1101ReadReg(CC1101_RXBYTES);
+                if((rx_bytes & 0x7f) != 0)
                 {
-                   rx_Base_DATA.size -= 1;
-                   rx_Base_DATA.Target_addr=CC1101ReadReg(CC1101_RXFIFO);
-                    CC1101ReadMultiReg(CC1101_RXFIFO, rx_Base_DATA.payload, rx_Base_DATA.size); 
-                    CC1101ReadMultiReg(CC1101_RXFIFO, RF_RX_status, 2);   // Read  status bytes     
-                    rx_Base_DATA.RSSI=RF_RX_status[0];
-                    rx_Base_DATA.CRC=RF_RX_status[1] & CRC_OK;
-                    rx_Base_DATA.LQI=RF_RX_status[1] & 0x7f;
-                    if( rx_Base_DATA.CRC )
+                    rx_Base_DATA.size=CC1101ReadReg(CC1101_RXFIFO);
+                    if(rx_Base_DATA.size != 0)
                     {
-                        RF_received_flag = 1;                                 
+                       rx_Base_DATA.size -= 1;
+                       rx_Base_DATA.Target_addr=CC1101ReadReg(CC1101_RXFIFO);
+                        CC1101ReadMultiReg(CC1101_RXFIFO, rx_Base_DATA.payload, rx_Base_DATA.size); 
+                        CC1101ReadMultiReg(CC1101_RXFIFO, RF_RX_status, 2);   // Read  status bytes     
+                        rx_Base_DATA.RSSI=RF_RX_status[0];
+                        rx_Base_DATA.CRC=RF_RX_status[1] & CRC_OK;
+                        rx_Base_DATA.LQI=RF_RX_status[1] & 0x7f;
+                        if( rx_Base_DATA.CRC )
+                        {
+                            RF_received_flag = 1;                                 
+                        }
                     }
                 }
             }
@@ -163,7 +175,21 @@ void RF_GD0_it_Handler(void)
         {     
              LED1_ON();
         }
-    } 
+    }
+    else//发送模式
+    {
+        if(CC_GDO0_READ() == 0)
+        {
+            if(CC1101ReadStatus(CC1101_MARCSTATE) == 22)//TXFIFO_UNDERFLOW 
+            {
+                CC1101ClrTXBuff();
+            }
+        }
+        else//已发送sync
+        {
+          
+        }
+    }
 }
 
 void RF_GD2_it_Handler(void)
@@ -184,7 +210,7 @@ void RF_Handler(void)
     }
     else  //接收完一帧无线数据
     {
-        uart_send_bits(rx_Base_DATA.payload,rx_Base_DATA.size); //发送到串口          
+        uart_send_bits(rx_Base_DATA.payload,rx_Base_DATA.size); //发送到串口    
         RF_received_flag = 0;      
     }
 }
