@@ -2103,7 +2103,10 @@
             <name>$PROJ_DIR$\..\APP\src\main.c</name>
         </file>
         <file>
-            <name>$PROJ_DIR$\..\APP\inc\STM8l10x_conf.h</name>
+            <name>$PROJ_DIR$\..\APP\src\protocol.c</name>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\APP\inc\stm8l10x_conf.h</name>
         </file>
         <file>
             <name>$PROJ_DIR$\..\APP\src\stm8l10x_it.c</name>

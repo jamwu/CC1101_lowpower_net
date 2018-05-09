@@ -14,11 +14,9 @@ INT8U RF_RX_status[2]={0};
 INT8U RF_RX_temp[64]={0};
 INT8U RF_TX_temp[64]={0};
 
-INT16U RF_timeout_count=0;
-INT16U RF_check_timer=0;
-INT8U RF_check_status=0;
-
-INT8U RF_status=0;
+INT16U RF_timeout_count=0;  //GDIO超时计时
+INT16U RF_check_timer=0;    //载波防碰撞超时计时
+INT16U RF_check_ack_timer = 0;  //接收ACK超时计时
 
 TX_Base_DATA tx_Base_DATA = {
   0,
@@ -29,7 +27,7 @@ TX_Base_DATA tx_Base_DATA = {
 RX_Base_DATA rx_Base_DATA = {
   0,
   0,
-  RF_TX_temp,
+  RF_RX_temp,
   0,
   0,
   0  
@@ -71,8 +69,9 @@ INT8U Get_Target_ADDR(void)
 }
 
 //长度不能超过60字节
-void RF_TX_DATA(INT8U *txbuffer, INT8U size, INT8U addr)
+INT8U RF_TX_DATA(INT8U *txbuffer, INT8U size, INT8U addr)
 {
+    INT8U status = 1;
     CC1101ClrTXBuff();
     RF_TRX_MODE=TX_MODE;
     CC1101SetTRMode( RX_MODE );
@@ -90,6 +89,7 @@ void RF_TX_DATA(INT8U *txbuffer, INT8U size, INT8U addr)
         {
             if(RF_timeout_count >= 100)//20ms
             {
+              status = 0;
               break;
             }     
         }
@@ -98,43 +98,20 @@ void RF_TX_DATA(INT8U *txbuffer, INT8U size, INT8U addr)
         {
             if(RF_timeout_count >= 100)//20ms
             {
+              status = 0;
               break;
             }            
         }
     }
     else
     {
+        status = 0;
         printf("CCA\n");
-    }
-
-}
-
-//任意长度
-void RF_TX_InfiniteDATA(INT8U *txbuffer, INT16U size, INT8U addr)
-{
-    INT16U i;
-    INT16U size_remainder = size % 60;//余数
-    INT16U size_aliquot = size / 60;//商
-    if(size < 60)
-    {
-        RF_TX_DATA(txbuffer, size, addr);
-    }
-    else
-    {
-        for(i=0;i<size_aliquot;i++)
-        {
-            delay_ms(1);
-            RF_TX_DATA(txbuffer+i*60, 60, addr);
-        }
-        if(size_remainder != 0)
-        {
-            delay_ms(1);
-            RF_TX_DATA(txbuffer+size_aliquot*60, size_remainder, addr);      
-        }
     }
     CC1101ClrTXBuff(); 
     CC1101SetTRMode( RX_MODE );
     RF_TRX_MODE = RX_MODE;
+    return status;
 }
 
 void RF_GD0_it_Handler(void)
@@ -161,9 +138,10 @@ void RF_GD0_it_Handler(void)
                         rx_Base_DATA.LQI=RF_RX_status[1] & 0x7f;
                         if( rx_Base_DATA.CRC )
                         {
+                            RF_gateway_get_ack();
                             RF_received_flag = 1;                                 
                         }
-                    }
+                    } 
                 }
             }
             LED1_OFF();
@@ -202,14 +180,13 @@ void RF_Handler(void)
     {
         if(uart_receive_timeout_flag == 1)//接收完一帧串口数据       
         {
-            uart_send_bits(uart_receive_temp,uart_receive_num); //回传
-            RF_TX_InfiniteDATA(uart_receive_temp, uart_receive_num, Target_ADDR);
             uart_receive_timeout_flag = 0;
+            uart_protocol_handle();
         }
     }
     else  //接收完一帧无线数据
     {
-        uart_send_bits(rx_Base_DATA.payload,rx_Base_DATA.size); //发送到串口    
-        RF_received_flag = 0;      
+        RF_received_flag = 0;  
+        wireless_protocol_handle();      
     }
 }

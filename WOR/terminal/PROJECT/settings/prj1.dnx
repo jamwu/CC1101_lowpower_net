@@ -16,7 +16,7 @@
         <ShowSource>1</ShowSource>
     </Trace1>
     <DebugChecksum>
-        <Checksum>3610256987</Checksum>
+        <Checksum>4272029269</Checksum>
     </DebugChecksum>
     <CallStack>
         <ShowArgs>0</ShowArgs>
@@ -106,8 +106,9 @@
         <Count>0</Count>
     </Breakpoints>
     <Aliases>
-        <Count>0</Count>
-        <SuppressDialog>0</SuppressDialog>
+        <A0>_ "F:\userdata\mypro\STM8L10X\RFCC1100网关1.8new\DRIVER\CPU\STM8L10x_StdPeriph_Driver\src\stm8l10x_spi.c" ""</A0>
+        <Count>1</Count>
+        <SuppressDialog>1</SuppressDialog>
     </Aliases>
     <DebuggerSettings>
         <DisableInterruptsWhenStepping>0</DisableInterruptsWhenStepping>

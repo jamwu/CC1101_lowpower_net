@@ -99,26 +99,26 @@ void  CC1101WORInit( void )
     //[3:2]=10,Timeout after XOSC start = Approx. 149 ¨C 155 ¦Ìs 
     //[1]=0,Disables the pin radio control option 
     //[0]=0,Force the XOSC to stay on in the SLEEP state =  Disable
-    CC1101WriteReg(CC1101_WORCTRL,0x78); 
+    CC1101WriteReg(CC1101_WORCTRL,0x38); 
     // Wake On Radio Control 
     //[7]=0,Power down signal to RC oscillator.When written to 0,automatic initial calibration will be performed. 
-    //[6:4]=111,Event 1 timeout = (1.333 ¨C 1.385 ms) ,clock periods after Event 0 before Event 1 times out. 
+    //[6:4]=011,Event 1 timeout = (0.333 ¨C 0.346 ms) ,clock periods after Event 0 before Event 1 times out. 
     //[3]=1,Enables the RC oscillator calibration. 
     //[1:0]=00,WOR_RES =00,Controls the Event 0 resolution as well as maximum timeout of the WOR module 
     //and maximum timeout under normal RX operation: 
-    CC1101WriteReg(CC1101_MCSM2,0x09);
+    CC1101WriteReg(CC1101_MCSM2,0x1B);
     //Main Radio Control State Machine Configuration 
-    //[4]=0,Direct RX termination based on RSSI measurement 
+    //[4]=1,Direct RX termination based on RSSI measurement 
     //[3]=1,When the RX_TIME timer expires, the chip checks if sync word is found when RX_TIME_QUAL=0
-    //[2:0]=001,Timeout for sync word search in RX for both WOR mode and normal RX 
+    //[2:0]=011,Timeout for sync word search in RX for both WOR mode and normal RX 
     //operation. The timeout is relative to the programmed EVENT0 timeout.  
-    //RX timeout = 0.89ms
-    CC1101WriteReg(CC1101_WOREVT1,0x01);
+    //RX timeout = 1.563ms
+    CC1101WriteReg(CC1101_WOREVT1,0x0D);
     // High Byte Event0 
-    CC1101WriteReg(CC1101_WOREVT0,0xF1);
+    CC1101WriteReg(CC1101_WOREVT0,0x8A);
     // Low Byte Event0 
-    //Event0 = 497
-    //EVENT0 timeout = 14.34ms
+    //Event0 = 3466
+    //EVENT0 timeout = 100ms
     CC1101WriteCmd( CC1101_SWORRST );
     //Reset real time clock to Event1 value. 
 }

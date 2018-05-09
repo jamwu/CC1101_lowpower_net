@@ -106,10 +106,15 @@ void AWU_Initializes(void)
 void timer4_it_handler(void)
 {
     RF_check_timer++;
-    if(RF_check_timer>5000)//1s
+    if(RF_check_timer>65534)
     {
         RF_check_timer = 0;
-        RF_check_status = 1;
+    }
+    //***************************************************************************************  
+    RF_check_ack_timer++;
+    if(RF_check_ack_timer>65534)
+    {
+        RF_check_ack_timer = 0;
     }
   //***************************************************************************************  
     RF_timeout_count++;
@@ -117,6 +122,7 @@ void timer4_it_handler(void)
     {
         RF_timeout_count = 0;
     }
+   
   //***************************************************************************************  
     spi_timer_count++;
     if(spi_timer_count > 254)
