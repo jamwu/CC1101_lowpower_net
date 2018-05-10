@@ -8,18 +8,18 @@ STM8+CC1101
 2.区分广播群发后的返回ACK地址问题。<br>
 3优化通信结构。<br>
 无线协议帧头<br>		
- 0	     1	          2	             3	            4	        5…     <br>
-起始	 本机地址	    目标地址	       功能字		      类型       数据    <br>
-EB	 local addr	  target addr	  01获取网关地址	   01ACK	            <br>
-			                          02获取终端地址	   02CMD	            <br>
-			                          03终端申请地址		                    <br>
-			                          04返回申请地址		                    <br>
-			                          05数据透传		                        <br>
+| 0   |	     1	     |     2	         |          3	         |       4	  |      5…  |   <br>
+|起始 |	 本机地址	|    目标地址        |	    功能字	      |	      类型      |    数据  |  <br>
+|EB   |	 local addr  |	  target addr    |	  01获取网关地址  |	   01ACK     |	        |    <br>
+|    |               |	                 |        02获取终端地址  |	   02CMD     |	         |   <br>
+|    |		     |	                 |        03终端申请地址  |		     |           |    <br>
+|    |		     |	                 |        04返回申请地址  |		     |           |    <br>
+|    |		     |	                 |        05数据透传      |		       |          |      <br>
 
 ### 2.设计终端和网关的地址相关协议。<br>
-地址：0x00                 广播      TYPE_BROADCAST <br>
-地址：0x01 ~ 0x0A         网关地址   TYPE_GATEWAY   <br>
-地址：0x0B ~ 0xFE         终端地址   TYPE_TERMINAL  <br>
+|地址：0x00            |     广播    |  TYPE_BROADCAST| <br>
+|地址：0x01 ~ 0x0A     |    网关地址 |  TYPE_GATEWAY  | <br>
+|地址：0x0B ~ 0xFE     |    终端地址 |  TYPE_TERMINAL  |<br>
 所有网关初始地址为0x01,网关自分配地址。<br>
 所有终端初始地址为0x0B，终端需向网关申请地址。<br>
 共255个地址。<br>
