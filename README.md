@@ -26,9 +26,9 @@ STM8+CC1101
 ### 2.设计终端和网关的地址相关协议。<br>
 
 |---|---|---|
-|地址：0x00            |     广播    |  TYPE_BROADCAST| 
-|地址：0x01 ~ 0x0A     |    网关地址 |  TYPE_GATEWAY  | 
-|地址：0x0B ~ 0xFE     |    终端地址 |  TYPE_TERMINAL  |
+|地址：0x00            |     广播    |  TYPE_BROADCAST 
+|地址：0x01 ~ 0x0A     |    网关地址 |  TYPE_GATEWAY  
+|地址：0x0B ~ 0xFE     |    终端地址 |  TYPE_TERMINAL 
 
 所有网关初始地址为0x01,网关自分配地址。<br>
 所有终端初始地址为0x0B，终端需向网关申请地址。<br>
