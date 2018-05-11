@@ -186,7 +186,17 @@ STM8的FLASH与EEPROM共用8KB空间，EEPROM为2KB，之前从起始位置读�
 终端串口接收的数据无协议。<br>
 终端收到串口数据后，发送前先选择最优网关，然后打包数据，添加帧头。<br>
 终端在收到无线数据时，若类型为02CMD，功能字为05（数据透传），则将除去帧头的数据发送到串口。<br>
-### 4.to do list:
+### 4.写了测试RSSI数据.xlsx文件，在/DOC中。
+内容为几张配置表：<br>
+1.与确定RSSI阈值有关的三张表typical RSSI value(dBm)、target value、absolute RSSI threshold。<br>
+2.CS threshold 的RSSI阈值确定的公式。<br>
+the RSSI value at CS threshold = typical RSSI value + (target value - 33) + (0 + absolute RSSI threshold)<br>
+3.CS threshold 的RSSI阈值配置的示例与实际配置。<br>
+4.将RSSI的寄存器值转换为实际值的表Typical RSSI_offset Values与过程。<br>
+5.根据实际配置参数选择的RSSI_offset Value。<br>
+6.根据实际配置参数在实际环境下测得的不同距离的RSSI寄存器值和实际RSSI值。表：Test RSSI value<br>
+说明：RF实际配置参数记录在/DOC/配置参数.xlsx文件中。<br>
+### 5.to do list:
 1.测试终端寻找网关机制。<br>
 2.测试终端选择最优网关机制。<br>
 3.测试终端向网关申请地址机制。<br>
