@@ -16,15 +16,18 @@
 /* Exported define -----------------------------------------------------------*/
 #define FRAMEDATA_HEAD 0XEB
 
+#define TYPE_BROADCAST 0X00
 #define TYPE_GATEWAY 0X01
 #define TYPE_TERMINAL 0X02
 
 #define FRAME_ACK 0X01
-#define FRAME_GET_GATEWAY_ADDR 0X02
-#define FRAME_GET_TERMINAL_ADDR 0X03
-#define FRAME_APPLY_TERMINAL_ADDR 0X04
-#define FRAME_RETURN_TERMINAL_ADDR 0X05
-#define FRAME_DATA_TRANSFER 0X06
+#define FRAME_CMD 0X02
+
+#define FRAME_GET_GATEWAY_ADDR 0X01
+#define FRAME_GET_TERMINAL_ADDR 0X02
+#define FRAME_APPLY_TERMINAL_ADDR 0X03
+#define FRAME_RETURN_TERMINAL_ADDR 0X04
+#define FRAME_DATA_TRANSFER 0X05
 
 /* Exported macro ------------------------------------------------------------*/
 
@@ -47,6 +50,7 @@ extern INT16U RF_timeout_count;
 extern INT16U RF_check_timer;
 extern INT16U RF_check_ack_timer;
 
+extern INT8U Local_Device_Type;
 extern INT8U Local_ADDR;
 extern INT8U Target_ADDR;
 
@@ -54,6 +58,10 @@ extern TX_Base_DATA tx_Base_DATA;
 extern RX_Base_DATA rx_Base_DATA;
 
 void RF_configuration(void);
+void Set_RF_INIT_FLAG(void); //标记RF初始化过
+void Erase_RF_INIT_FLAG(void); //擦除RF初始化标记
+INT8U Get_RF_INIT_FLAG(void);//读取RF是否初始化过
+
 void Set_Local_ADDR(INT8U Local_Addr);
 INT8U Get_Local_ADDR(void);
 void Set_Target_ADDR(INT8U Target_Addr);

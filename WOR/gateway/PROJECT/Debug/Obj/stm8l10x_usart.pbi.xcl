@@ -1,26 +1,26 @@
-"F:\userdata\mypro\STM8L10X\RFCC1100网关1.8new\DRIVER\CPU\STM8L10x_StdPeriph_Driver\src\stm8l10x_usart.c"
+"D:\mypro\STM8\CC1101_lowpower_net\WOR\gateway\DRIVER\CPU\STM8L10x_StdPeriph_Driver\src\stm8l10x_usart.c"
 -std=c99
 -ferror-limit=0
 -I
-F:\userdata\mypro\STM8L10X\RFCC1100网关1.8new\PROJECT\..\APP\inc
+D:\mypro\STM8\CC1101_lowpower_net\WOR\gateway\PROJECT\..\APP\inc
 -I
-F:\userdata\mypro\STM8L10X\RFCC1100网关1.8new\PROJECT\..\BSP\inc
+D:\mypro\STM8\CC1101_lowpower_net\WOR\gateway\PROJECT\..\BSP\inc
 -I
-F:\userdata\mypro\STM8L10X\RFCC1100网关1.8new\PROJECT\..\DRIVER\CPU\STM8L10x_StdPeriph_Driver\inc
+D:\mypro\STM8\CC1101_lowpower_net\WOR\gateway\PROJECT\..\DRIVER\CPU\STM8L10x_StdPeriph_Driver\inc
 -I
-F:\userdata\mypro\STM8L10X\RFCC1100网关1.8new\PROJECT\..\DRIVER\RF\inc
+D:\mypro\STM8\CC1101_lowpower_net\WOR\gateway\PROJECT\..\DRIVER\RF\inc
 -I
 C:\Program Files (x86)\IAR Systems\Embedded Workbench 8.0\stm8\inc
 -I
 C:\Program Files (x86)\IAR Systems\Embedded Workbench 8.0\stm8\inc\c
 -I
-F:\userdata\mypro\STM8L10X\RFCC1100网关1.8new\APP\inc
+D:\mypro\STM8\CC1101_lowpower_net\WOR\gateway\APP\inc
 -I
-F:\userdata\mypro\STM8L10X\RFCC1100网关1.8new\BSP\inc
+D:\mypro\STM8\CC1101_lowpower_net\WOR\gateway\BSP\inc
 -I
-F:\userdata\mypro\STM8L10X\RFCC1100网关1.8new\DRIVER\CPU\STM8L10x_StdPeriph_Driver\inc
+D:\mypro\STM8\CC1101_lowpower_net\WOR\gateway\DRIVER\CPU\STM8L10x_StdPeriph_Driver\inc
 -I
-F:\userdata\mypro\STM8L10X\RFCC1100网关1.8new\DRIVER\RF\inc
+D:\mypro\STM8\CC1101_lowpower_net\WOR\gateway\DRIVER\RF\inc
 -D__CHAR_BITS__=8
 -D__CHAR_MAX__=0xff
 -D__CHAR_MIN__=0

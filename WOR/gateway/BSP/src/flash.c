@@ -10,7 +10,7 @@
 uint8_t ReadE2PData(uint16_t offset)
 {
     uint8_t Read_Word;
-    uint16_t add = 0x9800+offset;
+    uint16_t add = 0x9FFF - offset;
     
     FLASH_SetProgrammingTime(FLASH_ProgramTime_Standard);
     FLASH_Unlock(FLASH_MemType_Program);
@@ -25,7 +25,7 @@ uint8_t ReadE2PData(uint16_t offset)
 
 void SaveE2PData(uint16_t offset, uint8_t Data)
 {
-    uint16_t add = 0x9800+offset;
+    uint16_t add = 0x9FFF - offset;
     
     FLASH_SetProgrammingTime(FLASH_ProgramTime_Standard);
     FLASH_Unlock(FLASH_MemType_Program);

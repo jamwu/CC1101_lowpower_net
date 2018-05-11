@@ -5,6 +5,7 @@
 
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
+INT8U Local_Device_Type;
 INT8S CS_Threshold = -60;//RSSI = -60dBm
 INT8U Local_ADDR;
 INT8U Target_ADDR;
@@ -42,6 +43,7 @@ void RF_configuration(void)
   CC1101Init();
   CC1101WORInit();
   Set_Local_ADDR(0X0B);
+  Local_Device_Type = TYPE_TERMINAL;
   Set_Target_ADDR(0X01);
   Local_ADDR = Get_Local_ADDR();
   Target_ADDR = Get_Target_ADDR();
@@ -50,24 +52,39 @@ void RF_configuration(void)
   RF_TRX_MODE=RX_MODE;
 }
 
-void Set_Local_ADDR(INT8U Local_Addr)
+void Set_RF_INIT_FLAG(void) //标记RF初始化过
 {
-    SaveE2PData(0, Local_Addr);
+    SaveE2PData(0, 1);
 }
 
-INT8U Get_Local_ADDR(void)
+void Erase_RF_INIT_FLAG(void) //擦除RF初始化标记
+{
+    SaveE2PData(0, 0);
+}
+
+INT8U Get_RF_INIT_FLAG(void)//读取RF是否初始化过
 {
     return ReadE2PData(0);
 }
 
+void Set_Local_ADDR(INT8U Local_Addr)
+{
+    SaveE2PData(1, Local_Addr);
+}
+
+INT8U Get_Local_ADDR(void)
+{
+    return ReadE2PData(1);
+}
+
 void Set_Target_ADDR(INT8U Target_Addr)
 {
-    SaveE2PData(1, Target_Addr);
+    SaveE2PData(2, Target_Addr);
 }
 
 INT8U Get_Target_ADDR(void)
 {
-    return ReadE2PData(1);
+    return ReadE2PData(2);
 }
 
 //长度不能超过60字节
@@ -111,7 +128,7 @@ INT8U RF_TX_DATA(INT8U *txbuffer, INT8U size, INT8U addr)
     else
     {
         status = 0;
-        //printf("CCA\n");
+        printf("CCA\n");
     }
     CC1101ClrTXBuff(); 
     CC1101SetSWOR();

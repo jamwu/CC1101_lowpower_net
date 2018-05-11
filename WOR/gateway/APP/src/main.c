@@ -31,6 +31,7 @@
 /* Evalboard I/Os configuration */
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
+INT8U RF_INIT_FLAG;
 /* Private function prototypes -----------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/
 void system_init(void);
@@ -72,7 +73,21 @@ void system_init(void)
     CC_IRQGPIO_INIT();   
     /* Enable general interrupts */
     enableInterrupts();
+    Set_RF_INIT_FLAG();
+    Erase_RF_INIT_FLAG(); //擦除RF初始化标记
     CC1101SetTRMode(RX_MODE);
+    RF_get_gateway_devices();//获取在线网关
+    RF_check_ack_timer = 0;
+    delay_ms(2000);
+    RF_INIT_FLAG = Get_RF_INIT_FLAG();
+    if(RF_INIT_FLAG == 0)//RF未初始化
+    {
+        if(Local_Device_Type == TYPE_GATEWAY) //网关自分配地址
+        {
+           Local_ADDR = allocate_gateway_addr();          
+        }
+    }
+    printf("LAD:%d\r\n",Local_ADDR);
 }
 
 #ifdef  USE_FULL_ASSERT
