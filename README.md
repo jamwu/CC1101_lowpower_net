@@ -273,3 +273,44 @@ the RSSI value at CS threshold = typical RSSI value + (target value - 33) + (0 +
 节省EEPROM存储空间，减短地址同步的帧长,长度：5字节帧头 + 32字节地址池数据。
 ### 5.若收到地址同步后，比对发现有新增设备时，将更新的内容保存到EEPROM,否则不保存。
 ### 6.修复一些细节性小BUG。
+# 2018.05.17
+## V2.0
+### 1.由于一些初始化逻辑问题，加上初始化标记位。
+### 2.增加EEPROM连续读写多字节函数。
+封装好地址池更新、读取到EEPROM函数。
+### 3.优化地址在线池与地址在线标记功能。
+地址池各网关间同步，地址在线池不同步。
+### 4.flash空间不足
+8KB flash 地址范围为0x8000 —— 0x9FFF,<br>
+其中0x8000 —— 0x807F 为interrupt vectors<br>
+0x8080 —— 0x9FFF 为flash program memory including Data EEPROM.<br>
+DEBUG查看memory发现代码空间已占用到0x9fef,剩余的空间只有16byte。<br>
+对于终端设备，需要4字节<br>
+|---|---|---|
+|RF_INIT_FLAG           |1byte      |RF初始化标记  
+|RF_Local_DeviceType    |1byte      |RF本地设备类型
+|Local_ADDR             |1byte      |RF本机地址
+|Target_ADDR            |1byte      |RF目标地址
+对于网关设备，需要36字节，空间不足。<br>
+|---|---|---|
+|RF_INIT_FLAG           |1byte      |RF初始化标记  
+|RF_Local_DeviceType    |1byte      |RF本地设备类型
+|Local_ADDR             |1byte      |RF本机地址
+|Target_ADDR            |1byte      |RF目标地址
+|Addpool                |32byte     |RF终端地址池
+优化程序:<br>
+1.删除没有用到的库文件，没有效果（编译器已经做了优化）。<br>
+2.调整编译器优化设置：<br>
+Optimizations:<br>
+level ——>High(size)<br>
+Enable transformations:<br>
+Common subexpression elimination<br>
+Loop unrolling<br>
+Function inlining<br>
+Code motion<br>
+Type-based alias analysis<br>
+Cross call<br>
+3.精简了部分代码结构，能合在一起写就合在一起写。<br>
+4.尽可能能用局部变量代替全局变量。<br>
+空间仍不足。<br>
+
