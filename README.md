@@ -286,12 +286,14 @@ the RSSI value at CS threshold = typical RSSI value + (target value - 33) + (0 +
 0x8080 —— 0x9FFF 为flash program memory including Data EEPROM.<br>
 DEBUG查看memory发现代码空间已占用到0x9fef,剩余的空间只有16byte。<br>
 对于终端设备，需要4字节<br>
+|名称|大小|说明
 |---|---|---|
 |RF_INIT_FLAG           |1byte      |RF初始化标记  
 |RF_Local_DeviceType    |1byte      |RF本地设备类型
 |Local_ADDR             |1byte      |RF本机地址
 |Target_ADDR            |1byte      |RF目标地址
 对于网关设备，需要36字节，空间不足。<br>
+|名称|大小|说明
 |---|---|---|
 |RF_INIT_FLAG           |1byte      |RF初始化标记  
 |RF_Local_DeviceType    |1byte      |RF本地设备类型
