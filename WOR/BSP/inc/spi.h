@@ -6,7 +6,6 @@
 #include "stm8l10x.h"
 #include "stm8l10x_spi.h"
 #include "stm8l10x_exti.h"
-#include "stm8l10x_tim2.h"
 #include "uart.h"
 /* Exported types ------------------------------------------------------------*/
 /* Exported define -----------------------------------------------------------*/

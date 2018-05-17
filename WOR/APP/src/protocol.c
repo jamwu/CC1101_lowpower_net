@@ -6,8 +6,8 @@
 //*******************其中0x00为广播地址，0x01固定为网关地址*******************//
 //************************0x02为终端未初始化地址*****************************//
 //************************0x03~0xFE为终端可用地址，共251个*******************//
-INT8U Device_addrpool[32]={0};//地址分配池
-INT8U Device_aliveadd[255]={0};//设备在线池
+INT8U Device_addrpool[32]={0x07,0};//地址分配池
+INT8U Device_aliveadd[32]={0};//设备在线池
 /* Private variables ---------------------------------------------------------*/
 INT8U RF_ack_get_flag = 0;
 INT8U send_addr;
@@ -30,11 +30,7 @@ void wireless_addr_mark(INT8U addr)
     INT8U byte_index = addr / 8;
     INT8U bit_index = addr % 8;
     Device_addrpool[byte_index] |= (0x01 << bit_index);//地址占用标记
-    Device_aliveadd[addr]++;
-    if(Device_aliveadd[addr] >= 3)
-    {
-        Device_aliveadd[addr] = 3;
-    }
+    Device_aliveadd[byte_index] |= (0x01 << bit_index);//地址在线标记
 }
 
 void wireless_addr_getsync(INT8U *sync_addrdata)
@@ -56,16 +52,22 @@ void wireless_addr_getsync(INT8U *sync_addrdata)
     }
     if(add == 1)//保存到EEPROM中  
     {
-        SaveE2PDatas(2, Device_addrpool, 32);
+        Sync_Addpool_EEPROM();
     }
 }
 
 void wireless_addr_demark(INT8U addr)
 {
-    if(Device_aliveadd[addr] > 0)
-    {
-        Device_aliveadd[addr]--;
-    }
+    INT8U byte_index = addr / 8;
+    INT8U bit_index = addr % 8;
+    Device_aliveadd[byte_index] &= ~(0x01 << bit_index);//地址在线去标记
+}
+
+INT8U is_wireless_addr_online(INT8U addr)
+{
+    INT8U byte_index = addr / 8;
+    INT8U bit_index = addr % 8;
+    return Device_aliveadd[byte_index] & (0x01 << bit_index);
 }
 
 INT8U allocate_terminal_addr(void)
@@ -172,6 +174,7 @@ void RF_gateway_send_terminal_allocate_addr(INT8U target_addr)
         uart_send_bits("GSD_S\r\n",7);
     }
 }
+
 void RF_terminal_apply_addr(void)
 {
     INT8U status = 0;

@@ -58,10 +58,19 @@ extern RX_Base_DATA rx_Base_DATA;
 void RF_configuration(void);
 void RF_Reset_Check(void);
 
+void Set_RF_INIT_FLAG(void);
+void Erase_RF_INIT_FLAG(void);
+INT8U Get_RF_INIT_FLAG(void);
+void Set_RF_Local_DeviceType(INT8U devicetype);
+INT8U Get_RF_Local_DeviceType(void);
 void Set_Local_ADDR(INT8U Local_Addr);
 INT8U Get_Local_ADDR(void);
 void Set_Target_ADDR(INT8U Target_Addr);
 INT8U Get_Target_ADDR(void);
+void Reset_Addpool_EEPROM(void);
+void Sync_Addpool_EEPROM(void);
+void Get_Addpool_EEPROM(void);
+
 INT8U RF_TX_DATA(INT8U *txbuffer, INT8U size, INT8U addr);
 
 void RF_GD0_it_Handler(void);

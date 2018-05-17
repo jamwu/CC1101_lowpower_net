@@ -40,69 +40,6 @@ void delay_ms(uint16_t Delay)
     }
 }
 
-//LSI时钟测量
-uint32_t AWU_LSIMeasurement(void)
-{
-    uint32_t lsi_freq_hz = 0x0;
-    uint32_t fmaster = 0x0;
-    uint16_t ICValue1 = 0x0;
-    uint16_t ICValue2 = 0x0; 
-    
-    /* Get master frequency */
-    fmaster = CLK_GetClockFreq();
-    
-    CLK_PeripheralClockConfig(CLK_Peripheral_AWU,ENABLE);
-    
-    /* Enable the LSI measurement: LSI clock connected to timer Input Capture 1 */
-    AWU->CSR |= AWU_CSR_MSR;
-    /* Measure the LSI frequency with TIMER Input Capture 1 */
-
-    /* Enable TIM2 clock */
-    CLK_PeripheralClockConfig(CLK_Peripheral_TIM2, ENABLE);
-    
-    /* Capture only every 8 events!!! */
-    /* Enable capture of TI1 */   
-    TIM2_ICInit(TIM2_Channel_1,TIM2_ICPolarity_Rising,TIM2_ICSelection_DirectTI,TIM2_ICPSC_Div8,0);
-    
-    /* Enable TIM2 */
-    TIM2_Cmd(ENABLE); 
-    
-    /* wait a capture on cc1 */
-    while((TIM2->SR1 & TIM2_FLAG_CC1) != TIM2_FLAG_CC1);
-    /* Get CCR1 value*/
-    ICValue1 = TIM2_GetCapture1();
-    TIM2_ClearFlag(TIM2_FLAG_CC1);
-
-    /* wait a capture on cc1 */
-    while((TIM2->SR1 & TIM2_FLAG_CC1) != TIM2_FLAG_CC1);
-    /* Get CCR1 value*/
-    ICValue2 = TIM2_GetCapture1();
-    TIM2_ClearFlag(TIM2_FLAG_CC1);
-
-    /* Disable IC1 input capture */
-    TIM2->CCER1 &= (uint8_t)(~TIM_CCER1_CC1E);
-    /* Disable timer2 */
-    TIM2_Cmd(DISABLE); 
-    
-    /* DISABLE TIM2 clock */
-    CLK_PeripheralClockConfig(CLK_Peripheral_TIM2, DISABLE);   
-    
-    /* Compute LSI clock frequency */
-    lsi_freq_hz = (8 * fmaster) / (ICValue2 - ICValue1);
-
-    /* Disable the LSI measurement: LSI clock disconnected from timer Input Capture 1 */
-    AWU->CSR &= (uint8_t)(~AWU_CSR_MSR);
-
-    return (lsi_freq_hz);
-}
-//AWU自动唤醒
-void AWU_Initializes(void)
-{
-  AWU_LSICalibrationConfig(AWU_LSIMeasurement());//校正LSI时钟
-  AWU_Init(AWU_Timebase_1s);                     //初始化AWU
-  AWU_Cmd(ENABLE);
-}
-
 void timer4_it_handler(void)
 {
     RF_check_timer++;

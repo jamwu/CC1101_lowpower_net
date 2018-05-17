@@ -49,7 +49,7 @@ void main(void)
 {
     system_init();
     /* Executive loop, runs continually after initialization */
-    while (1)
+    while(1)
     {
         RF_Handler();
     }
@@ -66,28 +66,12 @@ void system_init(void)
     Init_TIM4();   
     spi_gpio_init();
     spi_configuration();   
-    //Local_Device_Type = TYPE_TERMINAL;
-    Local_Device_Type = TYPE_GATEWAY;
     RF_Reset_Check();
-    //EraseE2PDatas(2, 32);//擦除保存的地址池数据
-    if(Local_Device_Type == TYPE_GATEWAY)
-    {
-        printf("GATEWAY\r\n");
-        ReadE2PDatas(2, Device_addrpool, 32); //网关读取保存的地址池数据
-    }
-    else
-    {
-        printf("TERMINAL\r\n");
-    }
     RF_configuration();
     enableInterrupts();
     if(Local_ADDR == 0x02)//未初始化的终端
     {
-        RF_terminal_apply_addr();
-    }
-    if(Local_Device_Type == TYPE_TERMINAL)
-    {
-        CC1101SetSWOR();
+        RF_terminal_apply_addr();//终端申请地址
     }
 }
 

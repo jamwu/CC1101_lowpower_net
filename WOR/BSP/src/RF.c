@@ -20,9 +20,6 @@ INT16U RF_timeout_count=0;  //GDIO超时计时
 INT16U RF_check_timer=0;    //载波防碰撞超时计时
 INT16U RF_check_ack_timer = 0;  //接收ACK超时计时
 
-INT16U key_press_count = 0;
-INT16U key_press_time = 0;
-
 TX_Base_DATA tx_Base_DATA = {
   0,
   0,
@@ -47,12 +44,10 @@ void RF_configuration(void)
   if(Local_Device_Type == TYPE_TERMINAL)//终端
   {
       CC1101WORInit();
-      Set_Target_ADDR(0X01);
   }
-  else//网关
+  else
   {
-      Set_Local_ADDR(0X01);
-      Set_Target_ADDR(0X02);  
+      Get_Addpool_EEPROM();
   }
   Local_ADDR = Get_Local_ADDR();
   Target_ADDR = Get_Target_ADDR();
@@ -63,8 +58,12 @@ void RF_configuration(void)
 
 void RF_Reset_Check(void)
 {
-    while(READ_KEY == 0)
+    INT16U key_press_count = 0;
+    INT16U key_press_time = 0;
+    INT16U RF_init_flag = 0; 
+    while(READ_KEY == 0)//RESET操作
     {
+        LED2_ON(); 
         key_press_count ++;
         if(key_press_count == 50000)
         {
@@ -72,41 +71,105 @@ void RF_Reset_Check(void)
             key_press_time ++;
         }
     }
-    if(key_press_time >= 30)//3s
+    if(key_press_time >= 36)//按下按键时间大于3s，RESET
     {
-        Local_Device_Type = TYPE_GATEWAY;
+        Erase_RF_INIT_FLAG(); 
     }
-    else if(key_press_time >= 10)//1s,进行RESET
+    LED2_OFF(); 
+    RF_init_flag =Get_RF_INIT_FLAG();
+    while(RF_init_flag==0)
     {
-        if(Local_Device_Type != TYPE_GATEWAY)
+        LED1_ON(); 
+        while(READ_KEY == 0)
         {
+            key_press_count ++;
+            if(key_press_count == 50000)
+            {
+                key_press_count = 0;
+                key_press_time ++;      
+            }
+        }
+       if(key_press_time >= 36)//按下按键时间大于3s，设置为网关
+       {
+            Set_RF_Local_DeviceType(TYPE_GATEWAY);
+            Set_Local_ADDR(0X01);
+            Set_Target_ADDR(0X02);
+            Reset_Addpool_EEPROM();
+            Set_RF_INIT_FLAG();
+            RF_init_flag = 1;
+       }
+       else if((key_press_time > 0)&&(key_press_time <= 12))//按下按键时间小于1s，设置为终端
+       {
+            Set_RF_Local_DeviceType(TYPE_TERMINAL);
             Set_Local_ADDR(0X02);
-        }
-        else
-        {
-            EraseE2PDatas(2, 32);//擦除保存的地址池数据
-        }
+            Set_Target_ADDR(0X01);
+            Set_RF_INIT_FLAG();
+            RF_init_flag = 1;
+       }
     }
+    LED1_OFF(); 
 }
 
-void Set_Local_ADDR(INT8U Local_Addr)
+void Set_RF_INIT_FLAG(void) //标记RF初始化过
 {
-    SaveE2PData(0, Local_Addr);
+    SaveE2PData(0, 1);
 }
 
-INT8U Get_Local_ADDR(void)
+void Erase_RF_INIT_FLAG(void) //擦除RF初始化标记
+{
+    SaveE2PData(0, 0);
+}
+
+INT8U Get_RF_INIT_FLAG(void)//读取RF是否初始化过
 {
     return ReadE2PData(0);
 }
 
+void Set_RF_Local_DeviceType(INT8U devicetype)
+{
+    Local_Device_Type = devicetype;
+    SaveE2PData(1, devicetype);
+}
+
+INT8U Get_RF_Local_DeviceType(void)
+{
+    return ReadE2PData(1);
+}
+
+void Set_Local_ADDR(INT8U Local_Addr)
+{
+    SaveE2PData(2, Local_Addr);
+}
+
+INT8U Get_Local_ADDR(void)
+{
+    return ReadE2PData(2);
+}
+
 void Set_Target_ADDR(INT8U Target_Addr)
 {
-    SaveE2PData(1, Target_Addr);
+    SaveE2PData(3, Target_Addr);
 }
 
 INT8U Get_Target_ADDR(void)
 {
-    return ReadE2PData(1);
+    return ReadE2PData(3);
+}
+
+void Reset_Addpool_EEPROM(void)
+{
+    EraseE2PDatas(4, 32);//擦除保存的地址池数据
+    SaveE2PData(4, 0x07);//默认地址池  
+}
+
+void Sync_Addpool_EEPROM(void)
+{
+    SaveE2PDatas(4, Device_addrpool, 32);
+}
+
+void Get_Addpool_EEPROM(void)
+{
+    ReadE2PDatas(4, Device_addrpool, 32); //网关读取保存的地址池数据
 }
 
 //长度不能超过60字节
