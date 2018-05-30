@@ -5,10 +5,8 @@
 
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
-INT8U Local_Device_Type;
 INT8S CS_Threshold = -60;//RSSI = -60dBm
 INT8U Local_ADDR;
-INT8U Target_ADDR;
 
 TRMODE RF_TRX_MODE=RX_MODE;
 
@@ -41,26 +39,27 @@ INT8U RF_received_flag = 0;
 void RF_configuration(void)
 {
   CC1101Init();
-  if(Local_Device_Type == TYPE_TERMINAL)//终端
+  Local_ADDR = Get_Local_ADDR();
+  if(Local_ADDR != GATEWAY_ADDR)//终端
   {
       CC1101WORInit();
   }
+  CC1101SetAddress(Local_ADDR, BROAD_0);    //BROAD_0 
+  RF_TRX_MODE=RX_MODE;
+  if(Local_ADDR != GATEWAY_ADDR)//终端
+  {
+      CC1101SetSWOR();
+  }
   else
   {
-      Get_Addpool_EEPROM();
+      CC1101SetTRMode(RX_MODE);
   }
-  Local_ADDR = Get_Local_ADDR();
-  Target_ADDR = Get_Target_ADDR();
-  CC1101SetAddress(Local_ADDR, BROAD_0);    //BROAD_0 
-  CC1101SetTRMode(RX_MODE);
-  RF_TRX_MODE=RX_MODE;
 }
 
 void RF_Reset_Check(void)
 {
     INT16U key_press_count = 0;
     INT16U key_press_time = 0;
-    INT16U RF_init_flag = 0; 
     while(READ_KEY == 0)//RESET操作
     {
         LED2_ON(); 
@@ -71,105 +70,26 @@ void RF_Reset_Check(void)
             key_press_time ++;
         }
     }
-    if(key_press_time >= 36)//按下按键时间大于3s，RESET
+    if(key_press_time >= 36)//按下按键时间大于3s，设置为网关
     {
-        Erase_RF_INIT_FLAG(); 
+        Set_Local_ADDR(GATEWAY_ADDR);
+    }
+    else if((key_press_time > 0)&&(key_press_time <= 12))//按下按键时间小于1s，设置为终端
+    {
+        Set_Local_ADDR(DEFAULT_TERMINAL_ADDR);
     }
     LED2_OFF(); 
-    RF_init_flag =Get_RF_INIT_FLAG();
-    while(RF_init_flag==0)
-    {
-        LED1_ON(); 
-        while(READ_KEY == 0)
-        {
-            key_press_count ++;
-            if(key_press_count == 50000)
-            {
-                key_press_count = 0;
-                key_press_time ++;      
-            }
-        }
-       if(key_press_time >= 36)//按下按键时间大于3s，设置为网关
-       {
-            Set_RF_Local_DeviceType(TYPE_GATEWAY);
-            Set_Local_ADDR(0X01);
-            Set_Target_ADDR(0X02);
-            Reset_Addpool_EEPROM();
-            Set_RF_INIT_FLAG();
-            RF_init_flag = 1;
-       }
-       else if((key_press_time > 0)&&(key_press_time <= 12))//按下按键时间小于1s，设置为终端
-       {
-            Set_RF_Local_DeviceType(TYPE_TERMINAL);
-            Set_Local_ADDR(0X02);
-            Set_Target_ADDR(0X01);
-            Set_RF_INIT_FLAG();
-            RF_init_flag = 1;
-       }
-    }
-    LED1_OFF(); 
-}
-
-void Set_RF_INIT_FLAG(void) //标记RF初始化过
-{
-    SaveE2PData(0, 1);
-}
-
-void Erase_RF_INIT_FLAG(void) //擦除RF初始化标记
-{
-    SaveE2PData(0, 0);
-}
-
-INT8U Get_RF_INIT_FLAG(void)//读取RF是否初始化过
-{
-    return ReadE2PData(0);
-}
-
-void Set_RF_Local_DeviceType(INT8U devicetype)
-{
-    Local_Device_Type = devicetype;
-    SaveE2PData(1, devicetype);
-}
-
-INT8U Get_RF_Local_DeviceType(void)
-{
-    return ReadE2PData(1);
 }
 
 void Set_Local_ADDR(INT8U Local_Addr)
 {
-    SaveE2PData(2, Local_Addr);
+    Local_ADDR = Local_Addr;
+    SaveE2PData(0, Local_Addr);
 }
 
 INT8U Get_Local_ADDR(void)
 {
-    return ReadE2PData(2);
-}
-
-void Set_Target_ADDR(INT8U Target_Addr)
-{
-    SaveE2PData(3, Target_Addr);
-}
-
-INT8U Get_Target_ADDR(void)
-{
-    return ReadE2PData(3);
-}
-
-void Reset_Addpool_EEPROM(void)
-{
-    EraseE2PDatas(4, 32);//擦除保存的地址池数据
-    SaveE2PData(4, 0x07);//默认地址池  
-}
-
-void Sync_Addpool_EEPROM(void)
-{
-    SaveE2PDatas(4, Device_addrpool, 32);
-}
-
-void Get_Addpool_EEPROM(void)
-{
-    ReadE2PDatas(4, Device_addrpool, 32); //网关读取保存的地址池数据
+    return ReadE2PData(0);
 }
 
 //长度不能超过60字节
@@ -213,10 +133,16 @@ INT8U RF_TX_DATA(INT8U *txbuffer, INT8U size, INT8U addr)
     else
     {
         status = 0;
-        printf("CCA\n");
+        #ifdef RF_PROTOCOL_DEBUG
+        uart_send_temp[0] = FRAMEDATA_HEAD;
+        uart_send_temp[1] = UART_LOCAL_DEVICE;
+        uart_send_temp[2] = UART_FRAME_RETURN_STATUS;  
+        uart_send_temp[3] = UART_RF_SEND_CCA_BUSY; 
+        uart_send_bits(uart_send_temp,4);
+        #endif
     }
     CC1101ClrTXBuff(); 
-    if(Local_Device_Type == TYPE_TERMINAL)
+    if(Local_ADDR != GATEWAY_ADDR)
     {
         CC1101SetSWOR();
     }
@@ -260,7 +186,7 @@ void RF_GD0_it_Handler(void)
             }
             LED1_OFF();
             CC1101ClrRXBuff();
-            if(Local_Device_Type == TYPE_TERMINAL)
+            if(Local_ADDR != GATEWAY_ADDR)
             {
                 CC1101SetSWOR();
             }

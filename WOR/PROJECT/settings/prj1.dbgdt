@@ -863,7 +863,7 @@
                     <item>Local_Device_Type</item>
                     <item>Device_addrpool</item>
                     <item>Device_addrpool[255]</item>
-                    <item></item>
+                    <item />
                 </expressions>
                 <col-names>
                     <item>Expression</item>

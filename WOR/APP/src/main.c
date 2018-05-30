@@ -69,10 +69,6 @@ void system_init(void)
     RF_Reset_Check();
     RF_configuration();
     enableInterrupts();
-    if(Local_ADDR == 0x02)//Œ¥≥ı ºªØµƒ÷’∂À
-    {
-        RF_terminal_apply_addr();//÷’∂À…Í«Îµÿ÷∑
-    }
 }
 
 #ifdef  USE_FULL_ASSERT
