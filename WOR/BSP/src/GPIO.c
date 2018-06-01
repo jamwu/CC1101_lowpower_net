@@ -10,8 +10,8 @@ void EXGPIO_configuration(void)
 {
     GPIO_Init(GPIOB, GPIO_Pin_2,GPIO_Mode_Out_PP_High_Fast);//×´Ì¬Ö¸Ê¾
     
-    GPIO_Init(GPIOB, GPIO_Pin_1,GPIO_Mode_In_FL_IT);//IO»½ÐÑ
-    EXTI_SetPinSensitivity(EXTI_Pin_1, EXTI_Trigger_Rising_Falling);
+    GPIO_Init(GPIOB, GPIO_Pin_1,GPIO_Mode_In_PU_IT);//IO»½ÐÑ
+    EXTI_SetPinSensitivity(EXTI_Pin_1, EXTI_Trigger_Falling);
     ITC_SetSoftwarePriority(EXTI1_IRQn,ITC_PriorityLevel_1); 
     
     //LOW POWER SETTINGS

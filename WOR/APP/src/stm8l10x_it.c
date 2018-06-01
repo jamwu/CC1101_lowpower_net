@@ -225,6 +225,7 @@ __interrupt void EXTI1_IRQHandler(void)
     /* In order to detect unexpected events during development,
        it is recommended to set a breakpoint on the following instruction.
     */
+    module_ready_flag = 1;
     EXTI_ClearITPendingBit(EXTI_IT_Pin1);  
 }
 

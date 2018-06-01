@@ -134,7 +134,7 @@ void RF_get_ack(void)
 
 void RF_recive_ack_handle(void)
 {
-    if(RF_receive_addr >= GATEWAY_ADDR && RF_send_addr == GATEWAY_ADDR)//若为终端接受网关的ACK
+    if(RF_receive_addr > GATEWAY_ADDR && RF_send_addr == GATEWAY_ADDR)//若为终端接受网关的ACK
     { 
         #ifdef RF_PROTOCOL_DEBUG
         uart_send_temp[0] = FRAMEDATA_HEAD;
@@ -145,7 +145,7 @@ void RF_recive_ack_handle(void)
         #endif
         RF_send_ACK_to_gateway(RF_function_byte); //终端再返回一个ACK
     }
-    else if(RF_receive_addr == GATEWAY_ADDR && RF_send_addr >= GATEWAY_ADDR)//若为网关接受终端的ACK
+    else if(RF_receive_addr == GATEWAY_ADDR && RF_send_addr > GATEWAY_ADDR)//若为网关接受终端的ACK
     {
         if(RF_function_byte == RF_FRAME_SET_ADDR)//终端配置地址返回ACK
         {
@@ -178,12 +178,12 @@ void RF_recive_cmd_handle(void)
         uart_send_temp[3] = rx_Base_DATA.size - 5; 
         copy_datas(&uart_send_temp[4],&rx_Base_DATA.payload[5],rx_Base_DATA.size - 5);
         uart_send_bits(uart_send_temp,rx_Base_DATA.size - 1); //发送到串口 
-        if(RF_send_addr >= GATEWAY_ADDR && RF_receive_addr == GATEWAY_ADDR)//发送ACK
+        if(RF_send_addr > GATEWAY_ADDR && RF_receive_addr == GATEWAY_ADDR)//发送ACK
         {
             //发送端是终端，本机是网关
             RF_send_ACK_to_terminal(RF_send_addr,RF_function_byte);
         }
-        else if(RF_send_addr == GATEWAY_ADDR && RF_receive_addr >= GATEWAY_ADDR)
+        else if(RF_send_addr == GATEWAY_ADDR && RF_receive_addr > GATEWAY_ADDR)
         {
             //发送端是网关，本机是终端
             RF_send_ACK_to_gateway(RF_function_byte);
@@ -191,10 +191,10 @@ void RF_recive_cmd_handle(void)
     }
     else if(RF_function_byte == RF_FRAME_SET_ADDR)//配置地址
     {
-        if(RF_send_addr == GATEWAY_ADDR && RF_receive_addr >= GATEWAY_ADDR)
+        if(RF_send_addr == GATEWAY_ADDR && RF_receive_addr > GATEWAY_ADDR)
         {
             //发送端是网关，本机是终端
-            if(rx_Base_DATA.payload[5] > 0x02)//地址不可以配置成广播或网关或终端默认地址
+            if(rx_Base_DATA.payload[5] > DEFAULT_TERMINAL_ADDR)//地址不可以配置成广播或网关或终端默认地址
             {
                 Set_Local_ADDR(rx_Base_DATA.payload[5]);
                 RF_send_ACK_to_gateway(RF_function_byte);
@@ -223,13 +223,15 @@ void wireless_protocol_handle(void)
 
 void uart_local_cmd_handle(void)
 {
-    if(Local_ADDR >= GATEWAY_ADDR)//本机不是网关
+    if(Local_ADDR > GATEWAY_ADDR)//本机不是网关
     {
         if(uart_function_byte == UART_FRAME_SET_ADDR) //配置地址
         {
-            if(uart_receive_temp[3] > 0x02) //地址不可以配置成广播或网关或终端默认地址
+            if(uart_receive_temp[3] > DEFAULT_TERMINAL_ADDR) //地址不可以配置成广播或网关或终端默认地址
             {
+                CC1101SetIdle();
                 Set_Local_ADDR(uart_receive_temp[3]);
+                CC1101SetSWOR();
                 #ifdef RF_PROTOCOL_DEBUG                
                 uart_send_temp[0] = FRAMEDATA_HEAD;
                 uart_send_temp[1] = UART_LOCAL_DEVICE;
@@ -255,7 +257,7 @@ void uart_wireless_cmd_handle(void)
     uint8_t status = 0;
     if(uart_function_byte == UART_FRAME_SET_ADDR)
     {
-        if(Local_ADDR == GATEWAY_ADDR && uart_target_addr >= GATEWAY_ADDR) //本机是网关才有权配置终端地址
+        if(Local_ADDR == GATEWAY_ADDR && uart_target_addr > GATEWAY_ADDR) //本机是网关才有权配置终端地址
         {
             wireless_frame_head(uart_target_addr,uart_function_byte,RF_FRAME_CMD);
             tx_Base_DATA.payload[5] = uart_receive_temp[3];
@@ -284,24 +286,21 @@ void uart_wireless_cmd_handle(void)
     else if(uart_function_byte == RF_FRAME_DATA_TRANSFER)
     {
         wireless_frame_head(uart_target_addr,uart_function_byte,RF_FRAME_CMD);
-        if(uart_receive_temp[3] < 55)//数据长度
+        if(uart_receive_temp[3] <= 55)//数据长度
         {
-            if(uart_receive_num - 4 < 55)//除却uart帧头，实际收到的数据长度
-            {
-                copy_datas(&tx_Base_DATA.payload[5],&uart_receive_temp[4],uart_receive_num - 4);
-                tx_Base_DATA.size = uart_receive_num + 1; //uart_receive_num - 4 + 5
-            }
-            else //实际收到的串口数据大于给定的数据长度
-            {
-                copy_datas(&tx_Base_DATA.payload[5],&uart_receive_temp[4],55);//最多收55个字节
-                tx_Base_DATA.size = 60;
-            }
+            copy_datas(&tx_Base_DATA.payload[5],&uart_receive_temp[4],uart_receive_temp[3]);
+            tx_Base_DATA.size = uart_receive_temp[3] + 5; 
         }
-        if(uart_target_addr == GATEWAY_ADDR && Local_ADDR >= GATEWAY_ADDR)//本机是终端，接收是网关
+        else
+        {
+            copy_datas(&tx_Base_DATA.payload[5],&uart_receive_temp[4],55);
+            tx_Base_DATA.size = 60;             
+        }
+        if(uart_target_addr == GATEWAY_ADDR && Local_ADDR > GATEWAY_ADDR)//本机是终端，接收是网关
         {
             status = RF_send_data_to_gateway(tx_Base_DATA.payload, tx_Base_DATA.size, tx_Base_DATA.Target_addr);
         }
-        else if(uart_target_addr >= GATEWAY_ADDR && Local_ADDR == GATEWAY_ADDR)//本机是网关，接收是终端
+        else if(uart_target_addr > GATEWAY_ADDR && Local_ADDR == GATEWAY_ADDR)//本机是网关，接收是终端
         {
             status = RF_send_data_to_terminal(tx_Base_DATA.payload, tx_Base_DATA.size, tx_Base_DATA.Target_addr);
         }

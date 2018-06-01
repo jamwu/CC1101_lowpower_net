@@ -68,7 +68,6 @@ void system_init(void)
     spi_configuration();   
     RF_Reset_Check();
     RF_configuration();
-    enableInterrupts();
 }
 
 #ifdef  USE_FULL_ASSERT

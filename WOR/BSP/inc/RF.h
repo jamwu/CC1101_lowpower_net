@@ -74,6 +74,8 @@ extern INT8U Local_ADDR;
 extern TX_Base_DATA tx_Base_DATA;
 extern RX_Base_DATA rx_Base_DATA;
 
+extern INT8U module_ready_flag;
+
 void RF_configuration(void);
 void RF_Reset_Check(void);
 

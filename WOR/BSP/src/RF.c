@@ -18,6 +18,8 @@ INT16U RF_timeout_count=0;  //GDIO超时计时
 INT16U RF_check_timer=0;    //载波防碰撞超时计时
 INT16U RF_check_ack_timer = 0;  //接收ACK超时计时
 
+INT8U module_ready_flag = 0;
+
 TX_Base_DATA tx_Base_DATA = {
   0,
   0,
@@ -39,20 +41,24 @@ INT8U RF_received_flag = 0;
 void RF_configuration(void)
 {
   CC1101Init();
+  Set_Local_ADDR(DEFAULT_TERMINAL_ADDR);
   Local_ADDR = Get_Local_ADDR();
-  if(Local_ADDR != GATEWAY_ADDR)//终端
+  if(Local_ADDR > GATEWAY_ADDR)//终端
   {
       CC1101WORInit();
   }
   CC1101SetAddress(Local_ADDR, BROAD_0);    //BROAD_0 
   RF_TRX_MODE=RX_MODE;
-  if(Local_ADDR != GATEWAY_ADDR)//终端
+  if(Local_ADDR > GATEWAY_ADDR)//终端
   {
       CC1101SetSWOR();
+      enableInterrupts();
+      halt();
   }
   else
   {
       CC1101SetTRMode(RX_MODE);
+      enableInterrupts();
   }
 }
 
@@ -84,6 +90,7 @@ void RF_Reset_Check(void)
 void Set_Local_ADDR(INT8U Local_Addr)
 {
     Local_ADDR = Local_Addr;
+    CC1101SetAddress(Local_ADDR, BROAD_0);    //BROAD_0
     SaveE2PData(0, Local_Addr);
 }
 
@@ -100,7 +107,7 @@ INT8U RF_TX_DATA(INT8U *txbuffer, INT8U size, INT8U addr)
     CC1101ClrTXBuff();
     RF_TRX_MODE=TX_MODE;
     CC1101SetTRMode( RX_MODE );
-    delay_ms(1);
+    delay_ms(2);
     rssi=CC1101ReadStatus(CC1101_RSSI);
     rssi=CC1101_RSSI_Caculate(rssi);
     if(rssi < CS_Threshold)
@@ -142,7 +149,7 @@ INT8U RF_TX_DATA(INT8U *txbuffer, INT8U size, INT8U addr)
         #endif
     }
     CC1101ClrTXBuff(); 
-    if(Local_ADDR != GATEWAY_ADDR)
+    if(Local_ADDR > GATEWAY_ADDR)
     {
         CC1101SetSWOR();
     }
@@ -186,7 +193,7 @@ void RF_GD0_it_Handler(void)
             }
             LED1_OFF();
             CC1101ClrRXBuff();
-            if(Local_ADDR != GATEWAY_ADDR)
+            if(Local_ADDR > GATEWAY_ADDR)
             {
                 CC1101SetSWOR();
             }
@@ -229,11 +236,33 @@ void RF_Handler(void)
         {
             uart_receive_timeout_flag = 0;
             uart_protocol_handle();
+            if(Local_ADDR > GATEWAY_ADDR)
+            {
+                /* Loop until the end of transmission */
+                while (USART_GetFlagStatus(USART_FLAG_TC) == RESET);
+                halt();
+            }
         }
     }
     else  //接收完一帧无线数据
     {
         RF_received_flag = 0;  
-        wireless_protocol_handle();      
+        wireless_protocol_handle();     
+        if(Local_ADDR > GATEWAY_ADDR)
+        {
+            /* Loop until the end of transmission */
+            while (USART_GetFlagStatus(USART_FLAG_TC) == RESET);
+            halt();
+        }
     }
+    if(module_ready_flag)
+    {
+        module_ready_flag = 0;
+        uart_send_temp[0] = FRAMEDATA_HEAD;
+        uart_send_temp[1] = UART_LOCAL_DEVICE;
+        uart_send_temp[2] = UART_FRAME_RETURN_STATUS;  
+        uart_send_temp[3] = UART_STATUS_OK; 
+        uart_send_bits(uart_send_temp,4);
+    }
+
 }
