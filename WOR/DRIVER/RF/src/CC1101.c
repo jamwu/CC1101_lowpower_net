@@ -93,9 +93,9 @@ OUTPUT   : None
 void  CC1101WORInit( void )
 {
 
-    CC1101WriteReg(CC1101_MCSM0,0x18);
+    CC1101WriteReg(CC1101_MCSM0,0x38);
     // Main Radio Control State Machine Configuration 
-    //[5:4]=01,When to perform automatic calibration = When going from IDLE to RX or TX (or FSTXON) 
+    //[5:4]=11,When to perform automatic calibration = When going from IDLE to RX or TX (or FSTXON) 
     //[3:2]=10,Timeout after XOSC start = Approx. 149 ¨C 155 ¦Ìs 
     //[1]=0,Disables the pin radio control option 
     //[0]=0,Force the XOSC to stay on in the SLEEP state =  Disable

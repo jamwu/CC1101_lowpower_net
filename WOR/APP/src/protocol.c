@@ -15,7 +15,7 @@ INT8U RF_function_byte = 0;
 
 INT8U uart_target_addr = 0;
 INT8U uart_function_byte = 0;
-
+INT8U uart_protocol_debug = 0;
 /* Private function prototypes -----------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/
 void wireless_frame_head(INT8U target_addr,INT8U function_byte,INT8U cmd_type_byte)
@@ -26,6 +26,15 @@ void wireless_frame_head(INT8U target_addr,INT8U function_byte,INT8U cmd_type_by
     tx_Base_DATA.Target_addr = target_addr;
     tx_Base_DATA.payload[3] = function_byte;      
     tx_Base_DATA.payload[4] = cmd_type_byte;
+}
+
+void uart_return(INT8U target_addr,INT8U function_byte,INT8U state_byte)
+{
+    uart_send_temp[0] = FRAMEDATA_HEAD;
+    uart_send_temp[1] = target_addr;
+    uart_send_temp[2] = function_byte;  
+    uart_send_temp[3] = state_byte; 
+    uart_send_bits(uart_send_temp,4);
 }
 
 uint8_t RF_send_data_to_gateway(INT8U *txbuffer, INT8U size, INT8U addr)
@@ -48,30 +57,23 @@ uint8_t RF_send_data_to_gateway(INT8U *txbuffer, INT8U size, INT8U addr)
     return status;
 }
 
-void RF_send_ACK_to_gateway(INT8U function_byte)
+void RF_send_ACK_to_gateway(INT8U target_addr,INT8U function_byte)
 {
     uint8_t status;
-    wireless_frame_head(GATEWAY_ADDR,function_byte,RF_FRAME_ACK);
+    wireless_frame_head(target_addr,function_byte,RF_FRAME_ACK);
     tx_Base_DATA.size = 5;
     status = RF_send_data_to_gateway(tx_Base_DATA.payload, tx_Base_DATA.size, tx_Base_DATA.Target_addr);
-    #ifdef RF_PROTOCOL_DEBUG
-    if(status == 1)
+    if(uart_protocol_debug)
     {
-        uart_send_temp[0] = FRAMEDATA_HEAD;
-        uart_send_temp[1] = UART_LOCAL_DEVICE;
-        uart_send_temp[2] = UART_FRAME_RETURN_STATUS;  
-        uart_send_temp[3] = UART_ACK_SEND_TO_GATEWAY_OK; 
-        uart_send_bits(uart_send_temp,4);
+        if(status == 1)
+        {
+            uart_return(UART_LOCAL_DEVICE,UART_FRAME_RETURN_STATUS,UART_ACK_SEND_TO_GATEWAY_OK);
+        }
+        else
+        { 
+            uart_return(UART_LOCAL_DEVICE,UART_FRAME_RETURN_STATUS,UART_ACK_SEND_TO_GATEWAY_FAIL);
+        }
     }
-    else
-    {
-        uart_send_temp[0] = FRAMEDATA_HEAD;
-        uart_send_temp[1] = UART_LOCAL_DEVICE;
-        uart_send_temp[2] = UART_FRAME_RETURN_STATUS;  
-        uart_send_temp[3] = UART_ACK_SEND_TO_GATEWAY_FAIL; 
-        uart_send_bits(uart_send_temp,4);        
-    }
-    #endif
 }
 
 uint8_t RF_send_data_to_terminal(INT8U *txbuffer, INT8U size, INT8U addr)
@@ -101,24 +103,17 @@ void RF_send_ACK_to_terminal(INT8U target_addr,INT8U function_byte)
     wireless_frame_head(target_addr,function_byte,RF_FRAME_ACK);
     tx_Base_DATA.size = 5;
     status = RF_send_data_to_terminal(tx_Base_DATA.payload, tx_Base_DATA.size, tx_Base_DATA.Target_addr);
-    #ifdef RF_PROTOCOL_DEBUG
-    if(status == 1)
+    if(uart_protocol_debug)
     {
-        uart_send_temp[0] = FRAMEDATA_HEAD;
-        uart_send_temp[1] = UART_LOCAL_DEVICE;
-        uart_send_temp[2] = UART_FRAME_RETURN_STATUS;  
-        uart_send_temp[3] = UART_ACK_SEND_TO_TERMINAL_OK; 
-        uart_send_bits(uart_send_temp,4);
+        if(status == 1)
+        {
+            uart_return(UART_LOCAL_DEVICE,UART_FRAME_RETURN_STATUS,UART_ACK_SEND_TO_TERMINAL_OK);
+        }
+        else
+        {
+            uart_return(UART_LOCAL_DEVICE,UART_FRAME_RETURN_STATUS,UART_ACK_SEND_TO_TERMINAL_FAIL);
+        }   
     }
-    else
-    {
-        uart_send_temp[0] = FRAMEDATA_HEAD;
-        uart_send_temp[1] = UART_LOCAL_DEVICE;
-        uart_send_temp[2] = UART_FRAME_RETURN_STATUS;  
-        uart_send_temp[3] = UART_ACK_SEND_TO_TERMINAL_FAIL; 
-        uart_send_bits(uart_send_temp,4);        
-    }   
-    #endif
 }
 
 void RF_get_ack(void)
@@ -134,36 +129,24 @@ void RF_get_ack(void)
 
 void RF_recive_ack_handle(void)
 {
-    if(RF_receive_addr > GATEWAY_ADDR && RF_send_addr == GATEWAY_ADDR)//若为终端接受网关的ACK
+    if(RF_receive_addr >= DEFAULT_TERMINAL_ADDR && RF_send_addr < DEFAULT_TERMINAL_ADDR)//若为终端接受网关的ACK
     { 
-        #ifdef RF_PROTOCOL_DEBUG
-        uart_send_temp[0] = FRAMEDATA_HEAD;
-        uart_send_temp[1] = RF_send_addr;
-        uart_send_temp[2] = UART_FRAME_RETURN_STATUS;  
-        uart_send_temp[3] = UART_ACK_GET_FROM_GATEWAY_OK; 
-        uart_send_bits(uart_send_temp,4);    
-        #endif
-        RF_send_ACK_to_gateway(RF_function_byte); //终端再返回一个ACK
+        uart_return(RF_send_addr,UART_FRAME_RETURN_STATUS,UART_ACK_GET_FROM_GATEWAY_OK);
+        RF_send_ACK_to_gateway(RF_send_addr,RF_function_byte); //终端再返回一个ACK
     }
-    else if(RF_receive_addr == GATEWAY_ADDR && RF_send_addr > GATEWAY_ADDR)//若为网关接受终端的ACK
+    else if(RF_receive_addr < DEFAULT_TERMINAL_ADDR)//若为网关接受ACK
     {
         if(RF_function_byte == RF_FRAME_SET_ADDR)//终端配置地址返回ACK
         {
-            uart_send_temp[0] = FRAMEDATA_HEAD;
-            uart_send_temp[1] = RF_send_addr;
-            uart_send_temp[2] = UART_FRAME_RETURN_STATUS;  
-            uart_send_temp[3] = UART_RF_SET_TERMINAL_ADDR_OK; 
-            uart_send_bits(uart_send_temp,4); 
+            uart_return(RF_send_addr,UART_FRAME_RETURN_STATUS,UART_RF_SET_TERMINAL_ADDR_OK);
+        }
+        else if(RF_function_byte == RF_FRAME_GET_TARGET_RSSI)
+        {
+            uart_return(RF_send_addr,UART_FRAME_GET_TARGET_RSSI,rx_Base_DATA.RSSI);
         }
         else
-        {
-            #ifdef RF_PROTOCOL_DEBUG        
-            uart_send_temp[0] = FRAMEDATA_HEAD;
-            uart_send_temp[1] = RF_send_addr;
-            uart_send_temp[2] = UART_FRAME_RETURN_STATUS;  
-            uart_send_temp[3] = UART_ACK_GET_FROM_TERMINAL_OK; 
-            uart_send_bits(uart_send_temp,4);            
-            #endif
+        { 
+            uart_return(RF_send_addr,UART_FRAME_RETURN_STATUS,UART_ACK_GET_FROM_TERMINAL_OK);
         }
     }
 }
@@ -178,28 +161,36 @@ void RF_recive_cmd_handle(void)
         uart_send_temp[3] = rx_Base_DATA.size - 5; 
         copy_datas(&uart_send_temp[4],&rx_Base_DATA.payload[5],rx_Base_DATA.size - 5);
         uart_send_bits(uart_send_temp,rx_Base_DATA.size - 1); //发送到串口 
-        if(RF_send_addr > GATEWAY_ADDR && RF_receive_addr == GATEWAY_ADDR)//发送ACK
+        if(RF_send_addr >= DEFAULT_TERMINAL_ADDR)//发送ACK
         {
-            //发送端是终端，本机是网关
+            //发送端是终端
             RF_send_ACK_to_terminal(RF_send_addr,RF_function_byte);
         }
-        else if(RF_send_addr == GATEWAY_ADDR && RF_receive_addr > GATEWAY_ADDR)
+        else if(RF_send_addr < DEFAULT_TERMINAL_ADDR)
         {
-            //发送端是网关，本机是终端
-            RF_send_ACK_to_gateway(RF_function_byte);
+            //发送端是网关
+            RF_send_ACK_to_gateway(RF_send_addr,RF_function_byte);
         } 
     }
     else if(RF_function_byte == RF_FRAME_SET_ADDR)//配置地址
     {
-        if(RF_send_addr == GATEWAY_ADDR && RF_receive_addr > GATEWAY_ADDR)
+        if(RF_send_addr < DEFAULT_TERMINAL_ADDR && RF_receive_addr >= DEFAULT_TERMINAL_ADDR)
         {
             //发送端是网关，本机是终端
             if(rx_Base_DATA.payload[5] > DEFAULT_TERMINAL_ADDR)//地址不可以配置成广播或网关或终端默认地址
             {
                 Set_Local_ADDR(rx_Base_DATA.payload[5]);
-                RF_send_ACK_to_gateway(RF_function_byte);
+                RF_send_ACK_to_gateway(RF_send_addr,RF_function_byte);
             }
         }
+    }
+    else if(RF_function_byte == RF_FRAME_GET_TARGET_RSSI)//获取RSSI信号强度
+    {
+        //发送端是网关
+        if(RF_send_addr < DEFAULT_TERMINAL_ADDR)
+        {
+            RF_send_ACK_to_gateway(RF_send_addr,RF_function_byte);
+        } 
     }
 }
 
@@ -223,32 +214,42 @@ void wireless_protocol_handle(void)
 
 void uart_local_cmd_handle(void)
 {
-    if(Local_ADDR > GATEWAY_ADDR)//本机不是网关
+    if(uart_function_byte == UART_FRAME_SET_ADDR) //配置地址
     {
-        if(uart_function_byte == UART_FRAME_SET_ADDR) //配置地址
+        if(Local_ADDR < DEFAULT_TERMINAL_ADDR)//本机为网关
         {
-            if(uart_receive_temp[3] > DEFAULT_TERMINAL_ADDR) //地址不可以配置成广播或网关或终端默认地址
+            if((uart_receive_temp[3] > DEFAULT_GATEWAY_ADDR)&&(uart_receive_temp[3] < DEFAULT_TERMINAL_ADDR)) //地址不可以配置成广播或默认网关或终端地址
+            {
+                Set_Local_ADDR(uart_receive_temp[3]);                       
+                uart_return(UART_LOCAL_DEVICE,UART_FRAME_RETURN_STATUS,UART_SET_LOCAL_ADDR_OK);
+            }
+            else
+            {    
+                uart_return(UART_LOCAL_DEVICE,UART_FRAME_RETURN_STATUS,UART_SET_FORBIDDEN_ADDR);
+            }
+        }
+        else if(Local_ADDR >= DEFAULT_TERMINAL_ADDR)//本机为终端
+        {      
+            if(uart_receive_temp[3] > DEFAULT_TERMINAL_ADDR) //地址不可以配置成广播或网关或默认终端地址
             {
                 CC1101SetIdle();
                 Set_Local_ADDR(uart_receive_temp[3]);
-                CC1101SetSWOR();
-                #ifdef RF_PROTOCOL_DEBUG                
-                uart_send_temp[0] = FRAMEDATA_HEAD;
-                uart_send_temp[1] = UART_LOCAL_DEVICE;
-                uart_send_temp[2] = UART_FRAME_SET_ADDR;  
-                uart_send_temp[3] = UART_SET_LOCAL_ADDR_OK; 
-                uart_send_bits(uart_send_temp,4);                
-                #endif
+                CC1101SetSWOR();                         
+                uart_return(UART_LOCAL_DEVICE,UART_FRAME_RETURN_STATUS,UART_SET_LOCAL_ADDR_OK);
+            }
+            else
+            {    
+                uart_return(UART_LOCAL_DEVICE,UART_FRAME_RETURN_STATUS,UART_SET_FORBIDDEN_ADDR);
             }
         }
     }
-    if(uart_function_byte == UART_FRAME_GET_LOCAL_ADDR)
+    else if(uart_function_byte == UART_FRAME_GET_LOCAL_ADDR)//获取地址
     {
-        uart_send_temp[0] = FRAMEDATA_HEAD;
-        uart_send_temp[1] = UART_LOCAL_DEVICE;
-        uart_send_temp[2] = UART_FRAME_GET_LOCAL_ADDR;  
-        uart_send_temp[3] = Local_ADDR; 
-        uart_send_bits(uart_send_temp,4);
+        uart_return(UART_LOCAL_DEVICE,UART_FRAME_GET_LOCAL_ADDR,Local_ADDR);
+    }
+    else if(uart_function_byte == UART_FRAME_DEBUG_SELECT)//DEBUG开关
+    {
+        uart_protocol_debug = uart_receive_temp[3];
     }
 }
 
@@ -257,33 +258,46 @@ void uart_wireless_cmd_handle(void)
     uint8_t status = 0;
     if(uart_function_byte == UART_FRAME_SET_ADDR)
     {
-        if(Local_ADDR == GATEWAY_ADDR && uart_target_addr > GATEWAY_ADDR) //本机是网关才有权配置终端地址
+        if(Local_ADDR < DEFAULT_TERMINAL_ADDR && uart_target_addr >= DEFAULT_TERMINAL_ADDR) //本机是网关才有权无线配置终端地址
         {
-            wireless_frame_head(uart_target_addr,uart_function_byte,RF_FRAME_CMD);
-            tx_Base_DATA.payload[5] = uart_receive_temp[3];
-            tx_Base_DATA.size = 6;
-            status = RF_send_data_to_terminal(tx_Base_DATA.payload, tx_Base_DATA.size, tx_Base_DATA.Target_addr);
-            #ifdef RF_PROTOCOL_DEBUG 
-            if(status != 0)//发送成功
+            if(uart_receive_temp[3] > DEFAULT_TERMINAL_ADDR)//地址不可以配置成广播或网关或终端默认地址
             {
-                uart_send_temp[0] = FRAMEDATA_HEAD;
-                uart_send_temp[1] = UART_LOCAL_DEVICE;
-                uart_send_temp[2] = UART_FRAME_RETURN_STATUS;  
-                uart_send_temp[3] = UART_RF_SEND_TERMINAL_ADDR_OK; 
-                uart_send_bits(uart_send_temp,4);
+                wireless_frame_head(uart_target_addr,RF_FRAME_SET_ADDR,RF_FRAME_CMD);
+                tx_Base_DATA.payload[5] = uart_receive_temp[3];
+                tx_Base_DATA.size = 6;
+                status = RF_send_data_to_terminal(tx_Base_DATA.payload, tx_Base_DATA.size, tx_Base_DATA.Target_addr);
             }
             else
             {
-                uart_send_temp[0] = FRAMEDATA_HEAD;
-                uart_send_temp[1] = UART_LOCAL_DEVICE;
-                uart_send_temp[2] = UART_FRAME_RETURN_STATUS;  
-                uart_send_temp[3] = UART_RF_SEND_TERMINAL_ADDR_FAIL; 
-                uart_send_bits(uart_send_temp,4);                
+                uart_return(UART_LOCAL_DEVICE,UART_FRAME_RETURN_STATUS,UART_SET_FORBIDDEN_ADDR);
             }
-            #endif
+        }
+        else
+        {      
+            uart_return(UART_LOCAL_DEVICE,UART_FRAME_RETURN_STATUS,UART_CMD_PERMISION_DENIED);
         }
     }
-    else if(uart_function_byte == RF_FRAME_DATA_TRANSFER)
+    else if(uart_function_byte == UART_FRAME_GET_TARGET_RSSI)
+    {
+        if(Local_ADDR < DEFAULT_TERMINAL_ADDR) //本机是网关才有权获取RSSI
+        {
+            wireless_frame_head(uart_target_addr,RF_FRAME_GET_TARGET_RSSI,RF_FRAME_CMD);
+            tx_Base_DATA.size = 5;
+            if(uart_target_addr >= DEFAULT_TERMINAL_ADDR)//目标为终端
+            {
+                status = RF_send_data_to_terminal(tx_Base_DATA.payload, tx_Base_DATA.size, tx_Base_DATA.Target_addr);
+            }
+            else //目标为网关
+            {
+                status = RF_send_data_to_gateway(tx_Base_DATA.payload, tx_Base_DATA.size, tx_Base_DATA.Target_addr);
+            }
+        }
+        else
+        {
+            uart_return(UART_LOCAL_DEVICE,UART_FRAME_RETURN_STATUS,UART_CMD_PERMISION_DENIED);
+        }
+    }
+    else if(uart_function_byte == UART_FRAME_DATA_TRANSFER)
     {
         wireless_frame_head(uart_target_addr,uart_function_byte,RF_FRAME_CMD);
         if(uart_receive_temp[3] <= 55)//数据长度
@@ -296,38 +310,34 @@ void uart_wireless_cmd_handle(void)
             copy_datas(&tx_Base_DATA.payload[5],&uart_receive_temp[4],55);
             tx_Base_DATA.size = 60;             
         }
-        if(uart_target_addr == GATEWAY_ADDR && Local_ADDR > GATEWAY_ADDR)//本机是终端，接收是网关
+        if(uart_target_addr < DEFAULT_TERMINAL_ADDR)//接收是网关
         {
             status = RF_send_data_to_gateway(tx_Base_DATA.payload, tx_Base_DATA.size, tx_Base_DATA.Target_addr);
         }
-        else if(uart_target_addr > GATEWAY_ADDR && Local_ADDR == GATEWAY_ADDR)//本机是网关，接收是终端
+        else if(uart_target_addr >= DEFAULT_TERMINAL_ADDR)//接收是终端
         {
             status = RF_send_data_to_terminal(tx_Base_DATA.payload, tx_Base_DATA.size, tx_Base_DATA.Target_addr);
         }
-        #ifdef RF_PROTOCOL_DEBUG 
+    }
+    if(uart_protocol_debug)
+    {
         if(status != 0)//发送成功
         {
-            uart_send_temp[0] = FRAMEDATA_HEAD;
-            uart_send_temp[1] = UART_LOCAL_DEVICE;
-            uart_send_temp[2] = UART_FRAME_RETURN_STATUS;  
-            uart_send_temp[3] = UART_RF_DATA_SEND_OK; 
-            uart_send_bits(uart_send_temp,4);
+            uart_return(UART_LOCAL_DEVICE,UART_FRAME_RETURN_STATUS,UART_RF_SEND_OK);
         }
         else
-        {
-            uart_send_temp[0] = FRAMEDATA_HEAD;
-            uart_send_temp[1] = UART_LOCAL_DEVICE;
-            uart_send_temp[2] = UART_FRAME_RETURN_STATUS;  
-            uart_send_temp[3] = UART_RF_DATA_SEND_FAIL; 
-            uart_send_bits(uart_send_temp,4);            
+        {        
+            uart_return(UART_LOCAL_DEVICE,UART_FRAME_RETURN_STATUS,UART_RF_SEND_FAIL);
         }
-        #endif
     }
 }
 
 void uart_protocol_handle(void)
 {
-    uart_send_bits(uart_receive_temp,uart_receive_num); //回传
+    if(uart_protocol_debug)
+    {
+        uart_send_bits(uart_receive_temp,uart_receive_num); //回传
+    }
     if(uart_receive_temp[0] == FRAMEDATA_HEAD)
     {
         uart_target_addr = uart_receive_temp[1];
